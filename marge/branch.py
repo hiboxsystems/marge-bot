@@ -18,5 +18,9 @@ class Branch(gitlab.Resource):
         return self.info['name']
 
     @property
+    def commit_id(self):
+        return self.info['commit']['id']
+
+    @property
     def protected(self):
         return self.info['protected']

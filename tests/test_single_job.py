@@ -18,6 +18,7 @@ import marge.user
 from marge.gitlab import GET, PUT
 from marge.job import Fusion
 from marge.merge_request import MergeRequest
+from tests import create_bot_config
 from tests.git_repo_mock import RepoMock
 from tests.gitlab_api_mock import Error, Ok, MockLab
 from tests.test_project import INFO as TEST_PROJECT_INFO
@@ -74,10 +75,11 @@ class SingleJobMockLab(MockLab):
         api = self.api
         self.rewritten_sha = rewritten_sha
         if expect_gitlab_rebase:
+            project_id = self.merge_request_info['project_id']
+            merge_request_iid = self.merge_request_info['iid']
+
             api.add_transition(
-                PUT(
-                    f"/projects/{self.merge_request_info['project_id']}/merge_requests/{self.merge_request_info['iid']}/rebase",  # pylint: disable=line-too-long
-                ),
+                PUT(f'/projects/{project_id}/merge_requests/{merge_request_iid}/rebase'),
                 Ok(True),
                 from_state='initial',
                 to_state='rebase-in-progress',
@@ -205,6 +207,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
     @pytest.fixture()
     def options_factory(self, fusion, add_tested, add_reviewers, add_part_of):
+        if fusion is Fusion.gitlab_rebase and (
+            add_tested or add_reviewers or add_part_of
+        ):
+            pytest.skip('Modifying commit message when using GitLab API rebase is unsupported')
+
         def make_options(**kwargs):
             fixture_opts = {
                 'fusion': fusion,
@@ -301,8 +308,12 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
             user = marge.user.User.myself(api)
             job = marge.single_merge_job.SingleMergeJob(
-                api=api, user=user,
-                project=project, merge_request=merge_request, repo=repo,
+                api=api,
+                user=user,
+                project=project,
+                merge_request=merge_request,
+                repo=repo,
+                config=create_bot_config(user, options),
                 options=options,
             )
             return self.Mocks(mocklab=mocklab, api=api, job=job)
@@ -609,7 +620,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             dict(mocklab.merge_request_info, work_in_progress=True),
             from_state='now_is_wip',
         )
-        message = 'The request was marked as WIP as I was processing it (maybe a WIP commit?)'
+        message = 'The request was marked as Draft as I was processing it (maybe a Draft commit?)'
         with mocklab.expected_failure(message):
             job.execute()
         assert api.state == 'now_is_wip'

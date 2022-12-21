@@ -10,6 +10,7 @@ from marge.batch_job import BatchMergeJob, CannotBatch
 from marge.gitlab import GET
 from marge.job import CannotMerge, MergeJobOptions
 from marge.merge_request import MergeRequest
+from tests import create_bot_config
 from tests.gitlab_api_mock import MockLab, Ok, commit
 
 
@@ -34,13 +35,16 @@ class TestBatchJob:
         merge_request_iid = mocklab.merge_request_info['iid']
 
         merge_request = MergeRequest.fetch_by_iid(project_id, merge_request_iid, api)
+        user = marge.user.User.myself(api)
+        options = MergeJobOptions.default()
 
         params = {
             'api': api,
-            'user': marge.user.User.myself(api),
+            'user': user,
             'project': marge.project.Project.fetch_by_id(project_id, api),
             'repo': create_autospec(marge.git.Repo, spec_set=True),
-            'options': MergeJobOptions.default(),
+            'config': create_bot_config(user, options),
+            'options': options,
             'merge_requests': [merge_request]
         }
         params.update(batch_merge_kwargs)

@@ -16,11 +16,12 @@ from .pipeline import Pipeline
 
 class MergeJob:
 
-    def __init__(self, *, api, user, project, repo, options):
+    def __init__(self, *, api, user, project, repo, config, options):
         self._api = api
         self._user = user
         self._project = project
         self._repo = repo
+        self._config = config
         self._options = options
         self._merge_timeout = options.ci_timeout
 
@@ -153,7 +154,9 @@ class MergeJob:
                 merge_request.source_branch,
                 self._api,
             )
+
         current_pipeline = next(iter(pipeline for pipeline in pipelines if pipeline.sha == commit_sha), None)
+        log.debug('Current pipeline: %s', current_pipeline)
 
         if current_pipeline:
             ci_status = current_pipeline.status
@@ -187,7 +190,7 @@ class MergeJob:
             if ci_status == 'canceled':
                 raise CannotMerge('Someone canceled the CI.')
 
-            if ci_status not in ('pending', 'running'):
+            if ci_status not in ('created', 'pending', 'running'):
                 log.warning('Suspicious CI status: %r', ci_status)
 
             log.debug('Waiting for %s secs before polling CI status again', waiting_time_in_secs)
@@ -403,8 +406,11 @@ class MergeJob:
             change_type = "merged" if self.opts.fusion == Fusion.merge else "rebased"
             raise CannotMerge(f'Failed to push {change_type} changes, check my logs!') from err
 
-    def synchronize_using_gitlab_rebase(self, merge_request, expected_sha=None):
-        expected_sha = expected_sha or self._repo.get_commit_hash()
+    def synchronize_using_gitlab_rebase(self, merge_request, verify_expected_sha=True, expected_sha=None):
+        """Returns the new SHA of the MR HEAD."""
+        if verify_expected_sha:
+            expected_sha = expected_sha or self._repo.get_commit_hash()
+
         try:
             merge_request.rebase()
         except MergeRequestRebaseFailed as err:
@@ -421,11 +427,13 @@ class MergeJob:
                 raise CannotMerge("Sorry, I can't modify protected branches!") from err
             raise
         else:
-            if merge_request.sha != expected_sha:
+            if verify_expected_sha and merge_request.sha != expected_sha:
                 raise GitLabRebaseResultMismatch(
                     gitlab_sha=merge_request.sha,
                     expected_sha=expected_sha,
                 )
+
+            return merge_request.sha
 
 
 def _get_reviewer_names_and_emails(commits, approvals, api):

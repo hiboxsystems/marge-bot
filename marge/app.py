@@ -310,6 +310,9 @@ def main(args=None):
             options.ci_timeout = timedelta(minutes=options.max_ci_time_in_minutes)
 
         if options.batch:
+            if options.rebase_remotely:
+                raise Exception("Batch processing does not work together with rebase remotely.")
+
             logging.warning('Experimental batch mode enabled')
 
         if options.use_merge_strategy:
@@ -327,6 +330,7 @@ def main(args=None):
 
         config = bot.BotConfig(
             user=user,
+            use_only_gitlab_api=options.rebase_remotely,
             use_https=options.use_https,
             auth_token=auth_token,
             ssh_key_file=ssh_key_file,

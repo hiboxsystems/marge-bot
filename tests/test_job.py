@@ -11,6 +11,7 @@ import marge.gitlab
 import marge.merge_request
 import marge.project
 import marge.user
+from tests import create_bot_config
 
 
 class TestJob:
@@ -18,12 +19,16 @@ class TestJob:
         return create_autospec(marge.merge_request.MergeRequest, spec_set=True, **options)
 
     def get_merge_job(self, **merge_kwargs):
+        user = create_autospec(marge.user.User, spec_set=True)
+        options = MergeJobOptions.default()
+
         params = {
             'api': create_autospec(marge.gitlab.Api, spec_set=True),
-            'user': create_autospec(marge.user.User, spec_set=True),
+            'user': user,
             'project': create_autospec(marge.project.Project, spec_set=True),
             'repo': create_autospec(marge.git.Repo, spec_set=True),
-            'options': MergeJobOptions.default(),
+            'config': create_bot_config(user, options),
+            'options': options,
         }
         params.update(merge_kwargs)
         return MergeJob(**params)

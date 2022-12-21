@@ -52,6 +52,10 @@ class MockLab:  # pylint: disable=too-few-public-methods
             'state': 'opened',
             'merge_status': 'can_be_merged',
             'sha': self.commit_info['id'],
+            'diff_refs': {
+                'base_sha': initial_master_sha,  # the latest commit SHA on the upstream branch
+                'head_sha': self.commit_info['id'],
+            },
             'source_project_id': 1234,
             'target_project_id': 1234,
             'source_branch': 'useless_new_feature',

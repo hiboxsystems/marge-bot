@@ -127,11 +127,17 @@ class TestMergeRequest:
                 dict(INFO, rebase_in_progress=True)
             ),
             (
-                # GET('/projects/1234/merge_requests/54'),  # refetch_info -> succeeded
                 GET(
                     '/projects/1234/merge_requests/54',
                     {'include_rebase_in_progress': 'true'}
                 ),  # refetch_info -> succeeded
+                dict(INFO, rebase_in_progress=False)
+            ),
+            (
+                GET(
+                    '/projects/1234/merge_requests/54',
+                    {'include_rebase_in_progress': 'true'}
+                ),  # second refetch_info with correct SHA
                 dict(INFO, rebase_in_progress=False)
             ),
         ]
@@ -189,6 +195,13 @@ class TestMergeRequest:
                     '/projects/1234/merge_requests/54',
                     {'include_rebase_in_progress': 'true'}
                 ),  # refetch_info -> succeeded
+                dict(INFO, rebase_in_progress=False)
+            ),
+            (
+                GET(
+                    '/projects/1234/merge_requests/54',
+                    {'include_rebase_in_progress': 'true'}
+                ),  # second refetch_info with correct SHA
                 dict(INFO, rebase_in_progress=False)
             ),
         ]

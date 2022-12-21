@@ -20,8 +20,8 @@ class CannotBatch(Exception):
 class BatchMergeJob(MergeJob):
     BATCH_BRANCH_NAME = 'marge_bot_batch_merge_job'
 
-    def __init__(self, *, api, user, project, repo, options, merge_requests):
-        super().__init__(api=api, user=user, project=project, repo=repo, options=options)
+    def __init__(self, *, api, user, project, repo, config, options, merge_requests):
+        super().__init__(api=api, user=user, project=project, repo=repo, config=config, options=options)
         self._merge_requests = merge_requests
 
     def remove_batch_branch(self):

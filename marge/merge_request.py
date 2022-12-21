@@ -10,6 +10,7 @@ from .approvals import Approvals
 GET, POST, PUT, DELETE = gitlab.GET, gitlab.POST, gitlab.PUT, gitlab.DELETE
 
 
+# pylint: disable=too-many-public-methods
 class MergeRequest(gitlab.Resource):
 
     @classmethod
@@ -160,6 +161,10 @@ class MergeRequest(gitlab.Resource):
     def force_remove_source_branch(self):
         return self.info['force_remove_source_branch']
 
+    @property
+    def diff_refs_base_sha(self):
+        return self.info['diff_refs']['base_sha']
+
     def update_sha(self, sha):
         """record the updated sha. We don't use refetch_info instead as it may hit cache."""
         self._info['sha'] = sha
@@ -183,6 +188,7 @@ class MergeRequest(gitlab.Resource):
         self.refetch_info()
 
         if not self.rebase_in_progress:
+            log.debug('Rebasing through GitLab API..')
             self._api.call(PUT(
                 f'/projects/{self.project_id}/merge_requests/{self.iid}/rebase',
             ))
@@ -198,6 +204,12 @@ class MergeRequest(gitlab.Resource):
             if not self.rebase_in_progress:
                 if self.merge_error:
                     raise MergeRequestRebaseFailed(self.merge_error)
+
+                # GitLab does not seem to always return the latest SHA even after
+                # rebase_in_progress starts returning false, hence we need to wait
+                # a little bit more before returning.
+                time.sleep(5)
+                self.refetch_info()
                 return
 
             time.sleep(wait_between_attempts_in_secs)
