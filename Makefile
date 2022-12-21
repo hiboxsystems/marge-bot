@@ -28,7 +28,7 @@ bump-requirements: bump-poetry-lock clean-requirements requirements.txt requirem
 
 .PHONY: dockerize
 dockerize:
-	docker build --tag smarkets/marge-bot:$$(cat version) .
+	docker build --tag hiboxsystems/marge-bot:$$(cat version) .
 
 .PHONY: docker-push
 docker-push:
