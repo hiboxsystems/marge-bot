@@ -58,7 +58,7 @@ class SingleMergeJob(MergeJob):
                     source_repo_url=source_repo_url,
                 )
             except GitLabRebaseResultMismatch as err:
-                log.info("Gitlab rebase didn't give expected result: " + err.reason)
+                log.info("Gitlab rebase didn't give expected result: %r", err.reason)
                 merge_request.comment("Someone skipped the queue! Will have to try again...")
                 continue
 
