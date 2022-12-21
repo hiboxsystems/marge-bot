@@ -142,7 +142,9 @@ optional arguments:
                            [env var: MARGE_USE_MERGE_COMMIT_BATCHES] (default: False)
   --skip-ci-batches     Skip CI when updating individual MRs when using batches   [env var: MARGE_SKIP_CI_BATCHES] (default: False)
 ```
+
 Here is a config file example
+
 ```yaml
 add-part-of: true
 add-reviewers: true
@@ -164,8 +166,8 @@ ssh-key-file: token.FILE
 # OR use HTTPS instead of SSH
 #use-https: true
 ```
-For more information about configuring marge-bot see `--help`
 
+For more information about configuring marge-bot see `--help`
 
 ## Running
 
@@ -280,6 +282,7 @@ docker run --restart=on-failure \ # restart if marge crashes because GitLab is f
 HTTPS can be used using any other deployment technique as well.
 
 ### Running marge-bot in kubernetes
+
 It's also possible to run marge in kubernetes, e.g. here's how you use a ktmpl
 template:
 
@@ -298,6 +301,7 @@ Once running, the bot will continuously monitor all projects that have its user 
 will pick up any changes in membership at runtime.
 
 ### Running marge-bot in Swarm
+
 Or you can run marge in Docker Swarm, e.g. here's how you use a compose file:
 
 ```yaml
@@ -364,35 +368,39 @@ run:
 
 ### Running marge-bot as a plain python app
 
-You need to install the requirements first `pip install -r requirements_frozen.txt`,
-and then install Marge itself `python3 setup.py install` (note that you will need python3.6+).
+Install all dependencies with `poetry install` (note that you will need Python 3.6+).
 
 Afterwards, the minimal way to run marge is as follows.
 
 ```bash
-marge.app --auth-token-file marge-bot.token \
-          --gitlab-url 'http://your.gitlab.instance.com' \
-          --ssh-key-file marge-bot-ssh-key
+poetry run marge --auth-token-file marge-bot.token \
+                 --gitlab-url 'http://your.gitlab.instance.com' \
+                 --ssh-key-file marge-bot-ssh-key
 ```
 
 However, we suggest you use a systemd unit file or some other mechanism to
 automatically restart marge-bot in case of intermittent GitLab problems.
 
-### Setting up a development environment
+## Setting up a development environment
 
-Install `nix` by following https://nix.dev/tutorials/install-nix:
+1. Install `poetry` with `pip install poetry`.
+2. Check out this repository.
+3. Run `poetry install` in the repository root.
+
+### Running linting and tests
 
 ```shell
-$ sh <(curl -L https://nixos.org/nix/install) --daemon
+poetry run pytest
 ```
 
-After that, a Docker image can be built with:
+### Run marge-bot
 
 ```shell
-$ make dockerize
+poetry run marge
 ```
 
 ## Suggested workflow
+
 1. Alice creates a new merge request and assigns Bob and Charlie as reviewers
 
 2. Both review the code and after all issues they raise are resolved by Alice,
@@ -404,7 +412,6 @@ $ make dockerize
    the project), Marge-bot will merge (or rebase, depending on project settings)
    the merge request via the GitLab API. It can also add some headers to all
    commits in the merge request as described in the next section.
-
 
 ## Adding Reviewed-by:, Tested: and Part-of: to commit messages
 
@@ -445,6 +452,7 @@ commits introduced by a single Merge Request when using a fast-forward/rebase
 based merge workflow.
 
 ## Impersonating approvers
+
 If you want a full audit trail, you will configure GitLab
 [require approvals](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html#approvals-required)
 for PRs and also turn on
@@ -466,7 +474,6 @@ prevent shipping late on a Friday, but still want to allow marking merge request
 More than one embargo period can be specified, separated by commas. Any merge
 request assigned to her during an embargo period, will be merged in only once all
 embargoes are over.
-
 
 ## Batching Merge Requests
 
@@ -588,7 +595,6 @@ This reverts commit 0af5b70a98858c9509c895da2a673ebdb31e20b1.
 ```
 
 E.g. `git revert-mr 123`.
-
 
 ## Troubleshooting
 

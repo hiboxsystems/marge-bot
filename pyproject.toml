@@ -5,7 +5,7 @@ description = "Marge-bot is a merge-bot for GitLab that, beside other goodies, i
 license = "BSD-3-Clause"
 authors = ["Infrastructure <infrastructure@smarkets.com>"]
 readme = "README.md"
-repository = "https://github.com/smarkets/marge-bot"
+repository = "https://github.com/hiboxsystems/marge-bot"
 keywords = ["merge request", "gitlab"]
 
 [tool.poetry.dependencies]
