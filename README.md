@@ -389,6 +389,20 @@ marge.app --auth-token-file marge-bot.token \
 However, we suggest you use a systemd unit file or some other mechanism to
 automatically restart marge-bot in case of intermittent GitLab problems.
 
+### Setting up a development environment
+
+Install `nix` by following https://nix.dev/tutorials/install-nix:
+
+```shell
+$ sh <(curl -L https://nixos.org/nix/install) --daemon
+```
+
+After that, a Docker image can be built with:
+
+```shell
+$ make dockerize
+```
+
 ## Suggested workflow
 1. Alice creates a new merge request and assigns Bob and Charlie as reviewers
 
