@@ -1,6 +1,6 @@
 FROM python:3.9-slim AS builder
 
-ARG POETRY_VERSION=1.1.4
+ARG POETRY_VERSION=1.1.15
 RUN pip install poetry==$POETRY_VERSION
 
 WORKDIR /src
