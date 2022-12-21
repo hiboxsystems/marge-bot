@@ -10,6 +10,11 @@ dateparser==1.0.0
 flake8==3.8.4
 humanize==3.2.0
 idna==2.10
+
+# Workaround for AttributeError: 'EntryPoints' object has no attribute 'get'
+# More details: https://stackoverflow.com/a/73932581/227779
+importlib-metadata==4.8.3
+
 iniconfig==1.1.1
 isort==5.7.0
 lazy-object-proxy==1.5.2
