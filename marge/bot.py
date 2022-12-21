@@ -31,11 +31,13 @@ class Bot:
             )
 
     def start(self):
+        skip_clone = self._config.merge_opts.fusion is Fusion.gitlab_rebase
         with TemporaryDirectory() as root_dir:
             if self._config.use_https:
                 repo_manager = store.HttpsRepoManager(
                     user=self.user,
                     root_dir=root_dir,
+                    skip_clone=skip_clone,
                     auth_token=self._config.auth_token,
                     timeout=self._config.git_timeout,
                     reference=self._config.git_reference_repo,
@@ -44,6 +46,7 @@ class Bot:
                 repo_manager = store.SshRepoManager(
                     user=self.user,
                     root_dir=root_dir,
+                    skip_clone=skip_clone,
                     ssh_key_file=self._config.ssh_key_file,
                     timeout=self._config.git_timeout,
                     reference=self._config.git_reference_repo,
