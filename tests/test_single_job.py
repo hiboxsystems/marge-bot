@@ -726,12 +726,12 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         wip_merge_request = dict(mocklab.merge_request_info, work_in_progress=True)
         api.add_merge_request(wip_merge_request, from_state='initial')
 
-        with mocklab.expected_failure("Sorry, I can't merge requests marked as Work-In-Progress!"):
+        with mocklab.expected_failure("Sorry, I can't merge requests marked as Draft!"):
             job.execute()
 
         assert api.state == 'initial'
         assert api.notes == [
-            "I couldn't merge this branch: Sorry, I can't merge requests marked as Work-In-Progress!",
+            "I couldn't merge this branch: Sorry, I can't merge requests marked as Draft!",
         ]
 
     def test_wont_merge_branches_with_autosquash_if_rewriting(self, mocks):
