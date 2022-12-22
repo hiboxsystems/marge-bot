@@ -18,7 +18,7 @@ bump-requirements: bump-poetry-lock
 
 .PHONY: dockerize
 dockerize:
-	docker build --tag hiboxsystems/marge-bot:$$(cat version) .
+	docker build --tag docker.hibox.fi/hiboxsystems/marge-bot:$$(cat version) .
 
 .PHONY: docker-push
 docker-push:
@@ -28,12 +28,12 @@ docker-push:
 		docker login; \
 	fi
 
-	docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:latest; \
-	docker push hiboxsystems/marge-bot:latest;
+	docker tag docker.hibox.fi/hiboxsystems/marge-bot:$$(cat version) docker.hibox.fi/hiboxsystems/marge-bot:latest; \
+	docker push docker.hibox.fi/hiboxsystems/marge-bot:latest;
 
 	if [ "$(VERSION)" = "$$(cat version)" ]; then \
-		docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:$(VERSION); \
-		docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:stable; \
-		docker push hiboxsystems/marge-bot:$(VERSION); \
-		docker push hiboxsystems/marge-bot:stable; \
+		docker tag docker.hibox.fi/hiboxsystems/marge-bot:$$(cat version) docker.hibox.fi/hiboxsystems/marge-bot:$(VERSION); \
+		docker tag docker.hibox.fi/hiboxsystems/marge-bot:$$(cat version) docker.hibox.fi/hiboxsystems/marge-bot:stable; \
+		docker push docker.hibox.fi/hiboxsystems/marge-bot:$(VERSION); \
+		docker docker.hibox.fi/hiboxsystems/marge-bot:stable; \
 	fi
