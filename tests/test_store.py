@@ -19,7 +19,7 @@ class TestRepoManager:
         user = marge.user.User(api=None, info=dict(USER_INFO, name='Peter Parker', email='pparker@bugle.com'))
         self.root_dir = tempfile.TemporaryDirectory()
         self.repo_manager = marge.store.SshRepoManager(
-            user=user, root_dir=self.root_dir.name, skip_clone=False, ssh_key_file='/ssh/key',
+            user=user, root_dir=self.root_dir.name, ssh_key_file='/ssh/key',
         )
 
     def teardown_method(self, _method):

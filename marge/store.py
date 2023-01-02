@@ -6,11 +6,10 @@ from . import git
 
 class RepoManager:
 
-    def __init__(self, user, root_dir, skip_clone, timeout=None, reference=None):
+    def __init__(self, user, root_dir, timeout=None, reference=None):
         self._root_dir = root_dir
         self._user = user
         self._repos = {}
-        self._skip_clone = skip_clone
         self._timeout = timeout
         self._reference = reference
 
@@ -28,8 +27,8 @@ class RepoManager:
 
 class SshRepoManager(RepoManager):
 
-    def __init__(self, user, root_dir, skip_clone, ssh_key_file=None, timeout=None, reference=None):
-        super().__init__(user, root_dir, skip_clone, timeout, reference)
+    def __init__(self, user, root_dir, ssh_key_file=None, timeout=None, reference=None):
+        super().__init__(user, root_dir, timeout, reference)
         self._ssh_key_file = ssh_key_file
 
     def repo_for_project(self, project):
@@ -40,8 +39,7 @@ class SshRepoManager(RepoManager):
 
             repo = git.Repo(repo_url, local_repo_dir, ssh_key_file=self._ssh_key_file,
                             timeout=self._timeout, reference=self._reference)
-            if not self._skip_clone:
-                repo.clone()
+            repo.clone()
             repo.config_user_info(
                 user_email=self._user.email,
                 user_name=self._user.name,
@@ -58,8 +56,8 @@ class SshRepoManager(RepoManager):
 
 class HttpsRepoManager(RepoManager):
 
-    def __init__(self, user, root_dir, skip_clone, auth_token=None, timeout=None, reference=None):
-        super().__init__(user, root_dir, skip_clone, timeout, reference)
+    def __init__(self, user, root_dir, auth_token=None, timeout=None, reference=None):
+        super().__init__(user, root_dir, timeout, reference)
         self._auth_token = auth_token
 
     def repo_for_project(self, project):
@@ -74,8 +72,7 @@ class HttpsRepoManager(RepoManager):
 
             repo = git.Repo(repo_url, local_repo_dir, ssh_key_file=None,
                             timeout=self._timeout, reference=self._reference)
-            if not self._skip_clone:
-                repo.clone()
+            repo.clone()
             repo.config_user_info(
                 user_email=self._user.email,
                 user_name=self._user.name,
