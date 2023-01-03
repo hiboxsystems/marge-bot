@@ -128,7 +128,7 @@ class TestJob:
         with pytest.raises(CannotMerge) as exc_info:
             merge_job.ensure_mergeable_mr(merge_request)
 
-        assert exc_info.value.reason == "Sorry, I can't merge requests marked as Work-In-Progress!"
+        assert exc_info.value.reason == "Sorry, I can't merge requests marked as Draft!"
 
     def test_ensure_mergeable_mr_unresolved_discussion(self):
         merge_job = self.get_merge_job()

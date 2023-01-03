@@ -45,7 +45,7 @@ class MergeJob:
         log.debug('Ensuring MR %r is mergeable', merge_request)
 
         if merge_request.work_in_progress:
-            raise CannotMerge("Sorry, I can't merge requests marked as Work-In-Progress!")
+            raise CannotMerge("Sorry, I can't merge requests marked as Draft!")
 
         if merge_request.squash and self._options.requests_commit_tagging:
             raise CannotMerge(
