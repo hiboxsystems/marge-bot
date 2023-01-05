@@ -89,7 +89,7 @@ class BatchMergeJob(MergeJob):
             except CannotMerge as ex:
                 log.warning('Skipping unmergeable MR: "%s"', ex)
                 self.unassign_from_mr(merge_request)
-                merge_request.comment("I couldn't merge this merge request: {}".format(ex))
+                merge_request.comment(f"I couldn't merge this merge request: {ex}")
             else:
                 mergeable_mrs.append(merge_request)
         return mergeable_mrs
@@ -113,9 +113,9 @@ class BatchMergeJob(MergeJob):
     def merge_batch(self, target_branch, source_branch, no_ff=False):
         if no_ff:
             return self._repo.merge(
-                    target_branch,
-                    source_branch,
-                    '--no-ff',
+                target_branch,
+                source_branch,
+                '--no-ff',
             )
 
         return self._repo.fast_forward(
@@ -215,10 +215,10 @@ class BatchMergeJob(MergeJob):
 
         # Save the sha of remote <target_branch> so we can use it to make sure
         # the remote wasn't changed while we're testing against it
-        remote_target_branch_sha = self._repo.get_commit_hash('origin/%s' % target_branch)
+        remote_target_branch_sha = self._repo.get_commit_hash(f'origin/{target_branch}')
 
-        self._repo.checkout_branch(target_branch, 'origin/%s' % target_branch)
-        self._repo.checkout_branch(BatchMergeJob.BATCH_BRANCH_NAME, 'origin/%s' % target_branch)
+        self._repo.checkout_branch(target_branch, f'origin/{target_branch}')
+        self._repo.checkout_branch(BatchMergeJob.BATCH_BRANCH_NAME, f'origin/{target_branch}')
 
         batch_mr = self.create_batch_mr(
             target_branch=target_branch,
@@ -232,7 +232,7 @@ class BatchMergeJob(MergeJob):
                 _, source_repo_url, merge_request_remote = self.fetch_source_project(merge_request)
                 self._repo.checkout_branch(
                     merge_request.source_branch,
-                    '%s/%s' % (merge_request_remote, merge_request.source_branch),
+                    f'{merge_request_remote}/{merge_request.source_branch}',
                 )
 
                 if self._options.use_merge_commit_batches:
@@ -246,11 +246,8 @@ class BatchMergeJob(MergeJob):
                         BatchMergeJob.BATCH_BRANCH_NAME,
                         merge_request.source_branch,
                         '-m',
-                        'Batch merge !%s into %s (!%s)' % (
-                            merge_request.iid,
-                            merge_request.target_branch,
-                            batch_mr.iid
-                        ),
+                        # pylint: disable=line-too-long
+                        f'Batch merge !{merge_request.iid} into {merge_request.target_branch} (!{batch_mr.iid})',
                         local=True,
                     )
                 else:
@@ -288,7 +285,7 @@ class BatchMergeJob(MergeJob):
         # This switches git to <batch> branch
         self.push_batch()
         for merge_request in working_merge_requests:
-            merge_request.comment('I will attempt to batch this MR (!{})...'.format(batch_mr.iid))
+            merge_request.comment(f'I will attempt to batch this MR (!{batch_mr.iid})...')
 
         # wait for the CI of the batch MR
         if self._project.only_allow_merge_if_pipeline_succeeds:
@@ -297,10 +294,7 @@ class BatchMergeJob(MergeJob):
             except CannotMerge as err:
                 for merge_request in working_merge_requests:
                     merge_request.comment(
-                        'Batch MR !{batch_mr_iid} failed: {error} I will retry later...'.format(
-                            batch_mr_iid=batch_mr.iid,
-                            error=err.reason,
-                        ),
+                        f'Batch MR !{batch_mr.iid} failed: {err.reason} I will retry later...',
                     )
                 raise CannotBatch(err.reason) from err
 
@@ -322,9 +316,7 @@ class BatchMergeJob(MergeJob):
                     )
             except CannotBatch as err:
                 merge_request.comment(
-                    "I couldn't merge this merge request: {error} I will retry later...".format(
-                        error=str(err),
-                    ),
+                    f"I couldn't merge this merge request: {str(err)} I will retry later...",
                 )
                 raise
             except SkipMerge:
@@ -332,7 +324,7 @@ class BatchMergeJob(MergeJob):
                 raise
             except CannotMerge as err:
                 self.unassign_from_mr(merge_request)
-                merge_request.comment("I couldn't merge this merge request: %s" % err.reason)
+                merge_request.comment(f"I couldn't merge this merge request: {err.reason}")
                 raise
 
         # Accept the batch MR
@@ -354,4 +346,4 @@ class BatchMergeJob(MergeJob):
                 log.info('batch_mr.accept result: %s', ret)
             except gitlab.ApiError as err:
                 log.exception('Gitlab API Error:')
-                raise CannotMerge('Gitlab API Error: %s' % err) from err
+                raise CannotMerge(f'Gitlab API Error: {err}') from err

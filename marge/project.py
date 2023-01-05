@@ -12,7 +12,7 @@ class Project(gitlab.Resource):
 
     @classmethod
     def fetch_by_id(cls, project_id, api):
-        info = api.call(GET('/projects/%s' % project_id))
+        info = api.call(GET(f'/projects/{project_id}'))
         return cls(api, info)
 
     @classmethod
@@ -105,9 +105,9 @@ class Project(gitlab.Resource):
     def access_level(self):
         permissions = self.info['permissions']
         effective_access = (
-                permissions['project_access']
-                or permissions['group_access']
-                or permissions.get("marge")
+            permissions['project_access']
+            or permissions['group_access']
+            or permissions.get("marge")
         )
         assert effective_access is not None, "GitLab failed to provide user permissions on project"
         return AccessLevel(effective_access['access_level'])

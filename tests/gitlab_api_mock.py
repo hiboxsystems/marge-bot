@@ -2,11 +2,11 @@ import re
 import logging as log
 from collections import namedtuple
 
-import marge.gitlab as gitlab
-import tests.test_approvals as test_approvals
-import tests.test_commit as test_commit
-import tests.test_project as test_project
-import tests.test_user as test_user
+from marge import gitlab
+from tests import test_approvals
+from tests import test_commit
+from tests import test_project
+from tests import test_user
 
 GET = gitlab.GET
 POST = gitlab.POST
@@ -42,7 +42,7 @@ class MockLab:  # pylint: disable=too-few-public-methods
 
         self.author_id = 234234
         self.merge_request_info = {
-            'id':  53,
+            'id': 53,
             'iid': 54,
             'title': 'a title',
             'project_id': 1234,
@@ -88,9 +88,7 @@ class MockLab:  # pylint: disable=too-few-public-methods
         api.add_approvals(self.approvals_info)
         api.add_transition(
             GET(
-                '/projects/1234/repository/branches/{target}'.format(
-                    target=self.merge_request_info['target_branch'],
-                ),
+                f"/projects/1234/repository/branches/{self.merge_request_info['target_branch']}",
             ),
             Ok({'commit': {'id': self.initial_master_sha}}),
         )
@@ -107,7 +105,7 @@ class Api(gitlab.Api):
     def call(self, command, sudo=None):
         log.info(
             'CALL: %s%s @ %s',
-            'sudo %s ' % sudo if sudo is not None else '',
+            f'sudo {sudo if sudo is not None else ""} ',
             command,
             self.state,
         )
@@ -150,7 +148,7 @@ class Api(gitlab.Api):
             show_from = '*' if _from_state is None else repr(_from_state)
             log.info(
                 'REGISTERING %s%s from %s to %s',
-                'sudo %s ' % sudo if sudo is not None else '',
+                f'sudo {sudo if sudo is not None else ""} ',
                 command,
                 show_from,
                 show_from if to_state is None else repr(to_state),
@@ -168,7 +166,7 @@ class Api(gitlab.Api):
     def add_project(self, info, sudo=None, from_state=None, to_state=None):
         self.add_resource('/projects/{0.id}', info, sudo, from_state, to_state)
         self.add_transition(
-            GET('/projects/{0.id}/merge_requests'.format(attrs(info))),
+            GET(f'/projects/{attrs(info).id}/merge_requests'),
             List(r'/projects/\d+/merge_requests/\d+$', self),
             sudo, from_state, to_state,
         )
@@ -177,7 +175,7 @@ class Api(gitlab.Api):
         self.add_resource('/projects/{0.project_id}/merge_requests/{0.iid}', info, sudo, from_state, to_state)
         self.add_transition(
             GET(
-                '/projects/{0.project_id}/merge_requests/{0.iid}'.format(attrs(info)),
+                f'/projects/{attrs(info).project_id}/merge_requests/{attrs(info).iid}',
                 args={'include_rebase_in_progress': 'true'},
             ),
             Ok(info),
@@ -185,17 +183,19 @@ class Api(gitlab.Api):
         )
 
     def add_commit(self, project_id, info, sudo=None, from_state=None, to_state=None):
+        # pylint: disable=consider-using-f-string
         path = '/projects/%s/repository/commits/{0.id}' % project_id
         self.add_resource(path, info, sudo, from_state, to_state)
 
     def add_approvals(self, info, sudo=None, from_state=None, to_state=None):
+        # pylint: disable=consider-using-f-string
         path = '/projects/{0.project_id}/merge_requests/{0.iid}/approvals'
         self.add_resource(path, info, sudo, from_state, to_state)
 
     def add_pipelines(self, project_id, info, sudo=None, from_state=None, to_state=None):
         self.add_transition(
             GET(
-                '/projects/%s/pipelines' % project_id,
+                f'/projects/{project_id}/pipelines',
                 args={'ref': info['ref'], 'order_by': 'id', 'sort': 'desc'},
             ),
             Ok([info]),
@@ -205,7 +205,8 @@ class Api(gitlab.Api):
     def expected_note(self, merge_request, note, sudo=None, from_state=None, to_state=None):
         self.add_transition(
             POST(
-                '/projects/{0.project_id}/merge_requests/{0.iid}/notes'.format(attrs(merge_request)),
+                # pylint: disable=line-too-long
+                f'/projects/{attrs(merge_request).project_id}/merge_requests/{attrs(merge_request).iid}/notes',
                 args={'body': note}
             ),
             LeaveNote(note, self),

@@ -15,7 +15,7 @@ class MergeRequest(gitlab.Resource):
     @classmethod
     def create(cls, api, project_id, params):
         merge_request_info = api.call(POST(
-            '/projects/{project_id}/merge_requests'.format(project_id=project_id),
+            f'/projects/{project_id}/merge_requests',
             params,
         ))
         merge_request = cls(api, merge_request_info)
@@ -24,7 +24,7 @@ class MergeRequest(gitlab.Resource):
     @classmethod
     def search(cls, api, project_id, params):
         merge_requests = api.collect_all_pages(GET(
-            '/projects/{project_id}/merge_requests'.format(project_id=project_id),
+            f'/projects/{project_id}/merge_requests',
             params,
         ))
         return [cls(api, merge_request) for merge_request in merge_requests]
@@ -38,12 +38,13 @@ class MergeRequest(gitlab.Resource):
     @classmethod
     def fetch_assigned_at(cls, user, api, merge_request):
         assigned_at = 0
+        project_id = merge_request.get('project_id')
+        merge_request_iid = merge_request.get('iid')
+
         all_discussions = api.collect_all_pages(
-            GET('/projects/{project_id}/merge_requests/{merge_requests_id}/discussions'.format(
-                project_id=merge_request.get('project_id'),
-                merge_requests_id=merge_request.get('iid')
-            )))
-        match_body = 'assigned to @{username}'.format(username=user.username)
+            GET(f'/projects/{project_id}/merge_requests/{merge_request_iid}/discussions')
+        )
+        match_body = f'assigned to @{user.username}'
         for discussion in all_discussions:
             for note in discussion.get('notes'):
                 if match_body in note.get('body'):
@@ -51,7 +52,7 @@ class MergeRequest(gitlab.Resource):
                     date_format = "%Y-%m-%dT%H:%M:%S.%f%z"
                     if (sys.version_info.major, sys.version_info.minor) <= (3, 6):
                         assigned = datetime.datetime.strptime(date_string[:-1], date_format[:-2]) \
-                                .replace(tzinfo=datetime.timezone.utc).timestamp()
+                            .replace(tzinfo=datetime.timezone.utc).timestamp()
                     else:
                         assigned = datetime.datetime.strptime(date_string, date_format).timestamp()
                     if assigned > assigned_at:
@@ -63,13 +64,13 @@ class MergeRequest(gitlab.Resource):
         request_merge_order = 'created_at' if merge_order == 'assigned_at' else merge_order
 
         all_merge_request_infos = api.collect_all_pages(GET(
-            '/projects/{project_id}/merge_requests'.format(project_id=project_id),
+            f'/projects/{project_id}/merge_requests',
             {'state': 'opened', 'order_by': request_merge_order, 'sort': 'asc'},
         ))
         my_merge_request_infos = [
             mri for mri in all_merge_request_infos
-            if ((mri.get('assignee', {}) or {}).get('id') == user.id) or
-               (user.id in [assignee.get('id') for assignee in (mri.get('assignees', []) or [])])
+            if ((mri.get('assignee', {}) or {}).get('id') == user.id)
+            or (user.id in [assignee.get('id') for assignee in (mri.get('assignees', []) or [])])
         ]
 
         if merge_order == 'assigned_at':
@@ -165,16 +166,16 @@ class MergeRequest(gitlab.Resource):
 
     def refetch_info(self):
         self._info = self._api.call(GET(
-            '/projects/{0.project_id}/merge_requests/{0.iid}'.format(self),
+            f'/projects/{self.project_id}/merge_requests/{self.iid}',
             {'include_rebase_in_progress': 'true'}
         ))
 
     def comment(self, message):
         if self._api.version().release >= (9, 2, 2):
-            notes_url = '/projects/{0.project_id}/merge_requests/{0.iid}/notes'.format(self)
+            notes_url = f'/projects/{self.project_id}/merge_requests/{self.iid}/notes'
         else:
             # GitLab botched the v4 api before 9.2.2
-            notes_url = '/projects/{0.project_id}/merge_requests/{0.id}/notes'.format(self)
+            notes_url = f'/projects/{self.project_id}/merge_requests/{self.id}/notes'
 
         return self._api.call(POST(notes_url, {'body': message}))
 
@@ -183,7 +184,7 @@ class MergeRequest(gitlab.Resource):
 
         if not self.rebase_in_progress:
             self._api.call(PUT(
-                '/projects/{0.project_id}/merge_requests/{0.iid}/rebase'.format(self),
+                f'/projects/{self.project_id}/merge_requests/{self.iid}/rebase',
             ))
         else:
             # We wanted to rebase and someone just happened to press the button for us!
@@ -205,7 +206,7 @@ class MergeRequest(gitlab.Resource):
 
     def accept(self, remove_branch=False, sha=None, merge_when_pipeline_succeeds=True):
         return self._api.call(PUT(
-            '/projects/{0.project_id}/merge_requests/{0.iid}/merge'.format(self),
+            f'/projects/{self.project_id}/merge_requests/{self.iid}/merge',
             dict(
                 should_remove_source_branch=remove_branch,
                 merge_when_pipeline_succeeds=merge_when_pipeline_succeeds,
@@ -215,13 +216,13 @@ class MergeRequest(gitlab.Resource):
 
     def close(self):
         return self._api.call(PUT(
-            '/projects/{0.project_id}/merge_requests/{0.iid}'.format(self),
+            f'/projects/{self.project_id}/merge_requests/{self.iid}',
             {'state_event': 'close'},
         ))
 
     def assign_to(self, user_id):
         return self._api.call(PUT(
-            '/projects/{0.project_id}/merge_requests/{0.iid}'.format(self),
+            f'/projects/{self.project_id}/merge_requests/{self.iid}',
             {'assignee_id': user_id},
         ))
 
@@ -236,7 +237,7 @@ class MergeRequest(gitlab.Resource):
         return approvals
 
     def fetch_commits(self):
-        return self._api.call(GET('/projects/{0.project_id}/merge_requests/{0.iid}/commits'.format(self)))
+        return self._api.call(GET(f'/projects/{self.project_id}/merge_requests/{self.iid}/commits'))
 
 
 class MergeRequestRebaseFailed(Exception):
