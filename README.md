@@ -1,5 +1,9 @@
 # Marge-bot [![Test](https://github.com/smarkets/marge-bot/actions/workflows/test.yml/badge.svg)](https://github.com/smarkets/marge-bot/actions/workflows/test.yml)
 
+> This project is a friendly fork of https://github.com/smarkets/marge-bot, trying
+> to incorporate currently unmerged merge requests from the community. Our fork is
+> published to Docker Hub here: https://hub.docker.com/r/hiboxsystems/marge-bot
+
 Marge-bot is a merge-bot for GitLab that, beside other goodies,
 implements
 [the Not Rocket Science Rule Of Software Engineering:](http://graydon2.dreamwidth.org/1597.html)
