@@ -176,7 +176,7 @@ class SingleJobMockLab(MockLab):
             ),
             assign_to_author,
         )
-        error_note = "I couldn't merge this branch: %s" % message
+        error_note = "I couldn't merge this merge request: %s" % message
         self.api.expected_note(self.merge_request_info, error_note)
 
         yield
@@ -431,7 +431,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         assert api.state == 'pushed_but_head_changed'
         assert api.notes == [
-            "I couldn't merge this branch: Someone pushed to branch while we were trying to merge",
+            "I couldn't merge this merge request: Someone pushed to branch while we were trying to merge",
         ]
 
     def test_fails_if_branch_is_protected(self, mocks_factory, fusion):
@@ -632,7 +632,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         with mocklab.expected_failure(message):
             job.execute()
         assert api.state == 'now_is_wip'
-        assert api.notes == ["I couldn't merge this branch: %s" % message]
+        assert api.notes == ["I couldn't merge this merge request: %s" % message]
 
     def test_guesses_git_hook_error_on_merge_refusal(self, mocks):
         mocklab, api, job = mocks
@@ -656,7 +656,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         with mocklab.expected_failure(message):
             job.execute()
         assert api.state == 'rejected_by_git_hook'
-        assert api.notes == ["I couldn't merge this branch: %s" % message]
+        assert api.notes == ["I couldn't merge this merge request: %s" % message]
 
     def test_assumes_unresolved_discussions_on_merge_refusal(self, mocks):
         mocklab, api, job = mocks
@@ -681,7 +681,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             with patch.dict(mocklab.project_info, only_allow_merge_if_all_discussions_are_resolved=True):
                 job.execute()
         assert api.state == 'unresolved_discussions'
-        assert api.notes == ["I couldn't merge this branch: %s" % message]
+        assert api.notes == ["I couldn't merge this merge request: %s" % message]
 
     def test_discovers_if_someone_closed_the_merge_request(self, mocks):
         mocklab, api, job = mocks
@@ -702,7 +702,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         with mocklab.expected_failure(message):
             job.execute()
         assert api.state == 'oops_someone_closed_it'
-        assert api.notes == ["I couldn't merge this branch: %s" % message]
+        assert api.notes == ["I couldn't merge this merge request: %s" % message]
 
     def test_tells_explicitly_that_gitlab_refused_to_merge(self, mocks):
         mocklab, api, job = mocks
@@ -719,7 +719,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         with mocklab.expected_failure(message):
             job.execute()
         assert api.state == 'rejected_for_mysterious_reasons'
-        assert api.notes == ["I couldn't merge this branch: %s" % message]
+        assert api.notes == ["I couldn't merge this merge request: %s" % message]
 
     def test_wont_merge_wip_stuff(self, mocks):
         mocklab, api, job = mocks
@@ -731,7 +731,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         assert api.state == 'initial'
         assert api.notes == [
-            "I couldn't merge this branch: Sorry, I can't merge requests marked as Draft!",
+            "I couldn't merge this merge request: Sorry, I can't merge requests marked as Draft!",
         ]
 
     def test_wont_merge_branches_with_autosquash_if_rewriting(self, mocks):
@@ -782,4 +782,4 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             job.execute()
 
         assert api.state == 'initial'
-        assert api.notes == ["I couldn't merge this branch: {}".format(expected_message)]
+        assert api.notes == ["I couldn't merge this merge request: {}".format(expected_message)]

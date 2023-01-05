@@ -28,6 +28,10 @@ class Approvals(gitlab.Resource):
         return self.info['project_id']
 
     @property
+    def approvals_required(self):
+        return self.info['approvals_required']
+
+    @property
     def approvals_left(self):
         return self.info['approvals_left'] or 0
 
