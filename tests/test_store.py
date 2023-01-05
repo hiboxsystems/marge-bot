@@ -1,6 +1,6 @@
 import os.path
 import tempfile
-import unittest.mock as mock
+from unittest import mock
 
 import marge.git
 import marge.store
@@ -17,7 +17,7 @@ class TestRepoManager:
 
     def setup_method(self, _method):
         user = marge.user.User(api=None, info=dict(USER_INFO, name='Peter Parker', email='pparker@bugle.com'))
-        self.root_dir = tempfile.TemporaryDirectory()
+        self.root_dir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.repo_manager = marge.store.SshRepoManager(
             user=user, root_dir=self.root_dir.name, ssh_key_file='/ssh/key',
         )
@@ -26,7 +26,7 @@ class TestRepoManager:
         self.root_dir.cleanup()
 
     def new_project(self, project_id, path_with_namespace):
-        ssh_url_to_repo = 'ssh://buh.com/%s.git' % path_with_namespace
+        ssh_url_to_repo = f'ssh://buh.com/{path_with_namespace}.git'
         info = dict(
             PRJ_INFO,
             id=project_id,
@@ -46,13 +46,12 @@ class TestRepoManager:
         assert os.path.dirname(repo.local_path) == repo_manager.root_dir
         assert repo.local_path != repo_manager.root_dir
 
-        env = "GIT_SSH_COMMAND='%s -F /dev/null -o IdentitiesOnly=yes -i /ssh/key'" % (
-            marge.git.GIT_SSH_COMMAND,
-        )
+        env = f"GIT_SSH_COMMAND='{marge.git.GIT_SSH_COMMAND} -F /dev/null -o IdentitiesOnly=yes -i /ssh/key'"
+
         assert get_git_calls(git_run) == [
-            "%s git clone --origin=origin %s %s" % (env, project.ssh_url_to_repo, repo.local_path),
-            "%s git -C %s config user.email pparker@bugle.com" % (env, repo.local_path),
-            "%s git -C %s config user.name 'Peter Parker'" % (env, repo.local_path)
+            f"{env} git clone --origin=origin {project.ssh_url_to_repo} {repo.local_path}",
+            f"{env} git -C {repo.local_path} config user.email pparker@bugle.com",
+            f"{env} git -C {repo.local_path} config user.name 'Peter Parker'"
         ]
 
     def test_caches_repos_by_id(self, git_run):

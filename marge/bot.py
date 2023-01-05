@@ -24,10 +24,10 @@ class Bot:
 
         if not user.is_admin:
             assert not opts.reapprove, (
-                "{0.username} is not an admin, can't impersonate!".format(user)
+                f"{user.username} is not an admin, can't impersonate!"
             )
             assert not opts.add_reviewers, (
-                "{0.username} is not an admin, can't lookup Reviewed-by: email addresses ".format(user)
+                f"{user.username} is not an admin, can't lookup Reviewed-by: email addresses"
             )
 
     def start(self):
@@ -72,8 +72,8 @@ class Bot:
                 return
 
             big_sleep = max(0,
-                            min_time_to_sleep_after_iterating_all_projects_in_secs -
-                            time_to_sleep_between_projects_in_secs * len(projects))
+                            min_time_to_sleep_after_iterating_all_projects_in_secs
+                            - time_to_sleep_between_projects_in_secs * len(projects))
             log.info('Sleeping for %s seconds...', big_sleep)
             time.sleep(big_sleep)
 
@@ -198,8 +198,8 @@ class Bot:
 
 
 class BotConfig(namedtuple('BotConfig',
-                           'user use_https auth_token ssh_key_file project_regexp merge_order merge_opts ' +
-                           'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli')):
+                           'user use_https auth_token ssh_key_file project_regexp merge_order merge_opts '
+                           + 'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli')):
     pass
 
 

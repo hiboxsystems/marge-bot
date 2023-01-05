@@ -9,10 +9,7 @@ class Branch(gitlab.Resource):
     @classmethod
     def fetch_by_name(cls, project_id, branch, api):
         info = api.call(GET(
-            '/projects/{project_id}/repository/branches/{branch}'.format(
-                project_id=project_id,
-                branch=branch,
-            ),
+            f'/projects/{project_id}/repository/branches/{branch}',
         ))
         return cls(api, info)
 

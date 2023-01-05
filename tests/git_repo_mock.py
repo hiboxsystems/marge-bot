@@ -4,7 +4,7 @@ from datetime import timedelta
 import functools
 import shlex
 
-import marge.git as git
+from marge import git
 
 
 class RepoMock(git.Repo):
@@ -43,7 +43,7 @@ class RepoMock(git.Repo):
 
         command_impl_name = command.replace('-', '_')
         command_impl = getattr(self.mock_impl, command_impl_name, None)
-        assert command_impl, ('git: Unexpected command %s' % command)
+        assert command_impl, (f'git: Unexpected command {command}')
         try:
             result = command_impl(*command_args)
         except Exception:
@@ -81,7 +81,7 @@ class GitRepoModel:
         self._refs.pop(ref, None)
 
     def __repr__(self):
-        return "<%s: %s>" % (type(self), self._refs)
+        return f"<{type(self)}: {self._refs}>"
 
 
 class GitModel:
@@ -106,7 +106,7 @@ class GitModel:
             try:
                 self._remotes.pop(remote)
             except KeyError as err:
-                raise git.GitError('No such remote: %s' % remote) from err
+                raise git.GitError(f'No such remote: {remote}') from err
 
         elif action == 'add':
             _, remote, url = args
@@ -166,7 +166,7 @@ class GitModel:
         remote, branch = arg.split('/')
         new_base = self._remote_refs[remote].get_ref(branch)
         if new_base != self._head:
-            new_sha = 'rebase(%s onto %s)' % (self._head, new_base)
+            new_sha = f'rebase({self._head} onto {new_base})'
             self._local_repo.set_ref(self._branch, new_sha)
 
     def merge(self, arg):
@@ -174,7 +174,7 @@ class GitModel:
 
         other_ref = self._remote_refs[remote].get_ref(branch)
         if other_ref != self._head:
-            new_sha = 'merge(%s with %s)' % (self._head, other_ref)
+            new_sha = f'merge({self._head} with {other_ref})'
             self._local_repo.set_ref(self._branch, new_sha)
 
     def push(self, *args):
@@ -226,7 +226,7 @@ class GitModel:
         trailers_var, python, script_path = shlex.split(filter_cmd)
         _, trailers_str = trailers_var.split('=')
 
-        assert trailers_var == "TRAILERS=%s" % trailers_str
+        assert trailers_var == f"TRAILERS={trailers_str}"
         assert python == "python3"
         assert script_path.endswith("marge/trailerfilter.py")
 
@@ -234,7 +234,7 @@ class GitModel:
         assert trailers
 
         new_sha = functools.reduce(
-            lambda x, f: "add-%s(%s)" % (f, x),
+            lambda x, f: f"add-{f}({x})",
             [trailer.lower() for trailer in trailers],
             self._head
         )

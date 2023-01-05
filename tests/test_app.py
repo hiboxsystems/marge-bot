@@ -4,14 +4,14 @@ import os
 import re
 import shlex
 import tempfile
-import unittest.mock as mock
+from unittest import mock
 
 import pytest
 
-import marge.app as app
-import marge.bot as bot_module
-import marge.interval as interval
-import marge.job as job
+from marge import app
+from marge import bot as bot_module
+from marge import interval
+from marge import job
 
 import tests.gitlab_api_mock as gitlab_mock
 from tests.test_user import INFO as user_info
@@ -154,7 +154,7 @@ def test_rebase_remotely_option_conflicts():
     for conflicting_flag in ['--use-merge-strategy', '--add-tested', '--add-part-of', '--add-reviewers']:
         with env(MARGE_AUTH_TOKEN="NON-ADMIN-TOKEN", MARGE_SSH_KEY="KEY", MARGE_GITLAB_URL='http://foo.com'):
             with pytest.raises(app.MargeBotCliArgError):
-                with main('--rebase-remotely %s' % conflicting_flag):
+                with main(f'--rebase-remotely {conflicting_flag}'):
                     pass
 
 
@@ -190,7 +190,7 @@ def test_ci_timeout():
         with main("--ci-timeout 5m") as bot:
             assert bot.config.merge_opts != job.MergeJobOptions.default()
             assert bot.config.merge_opts == job.MergeJobOptions.default(
-                ci_timeout=datetime.timedelta(seconds=5*60),
+                ci_timeout=datetime.timedelta(seconds=5 * 60),
             )
 
 
@@ -199,7 +199,7 @@ def test_deprecated_max_ci_time_in_minutes():
         with main("--max-ci-time-in-minutes=5") as bot:
             assert bot.config.merge_opts != job.MergeJobOptions.default()
             assert bot.config.merge_opts == job.MergeJobOptions.default(
-                ci_timeout=datetime.timedelta(seconds=5*60),
+                ci_timeout=datetime.timedelta(seconds=5 * 60),
             )
 
 
@@ -263,7 +263,7 @@ def test_disabled_ssh_key_cli_arg():
 def test_config_file():
     with config_file() as config_file_name:
         with env(MARGE_AUTH_TOKEN="ADMIN-TOKEN"):
-            with main('--config-file=%s' % config_file_name) as bot:
+            with main(f'--config-file={config_file_name}') as bot:
                 admin_user_info = dict(**user_info)
                 admin_user_info['is_admin'] = True
                 assert bot.user.info == admin_user_info
@@ -274,7 +274,7 @@ def test_config_file():
                     add_part_of=True,
                     add_reviewers=True,
                     reapprove=True,
-                    ci_timeout=datetime.timedelta(seconds=5*60),
+                    ci_timeout=datetime.timedelta(seconds=5 * 60),
                 )
                 assert bot.config.project_regexp == re.compile('foo.*bar')
                 assert bot.config.git_timeout == datetime.timedelta(seconds=150)
@@ -284,7 +284,7 @@ def test_config_file():
 def test_config_overwrites():
     with config_file() as config_file_name:
         with env(MARGE_CI_TIMEOUT='20min', MARGE_AUTH_TOKEN="ADMIN-TOKEN"):
-            with main('--git-timeout=100s --config-file=%s' % config_file_name) as bot:
+            with main(f'--git-timeout=100s --config-file={config_file_name}') as bot:
                 admin_user_info = dict(**user_info)
                 admin_user_info['is_admin'] = True
                 assert bot.user.info == admin_user_info
@@ -295,7 +295,7 @@ def test_config_overwrites():
                     add_part_of=True,
                     add_reviewers=True,
                     reapprove=True,
-                    ci_timeout=datetime.timedelta(seconds=20*60),
+                    ci_timeout=datetime.timedelta(seconds=20 * 60),
                 )
                 assert bot.config.project_regexp == re.compile('foo.*bar')
                 assert bot.config.git_timeout == datetime.timedelta(seconds=100)

@@ -15,7 +15,7 @@ class Api:
         url = self._api_base_url + command.endpoint
         headers = {'PRIVATE-TOKEN': self._auth_token}
         if sudo:
-            headers['SUDO'] = '%d' % sudo
+            headers['SUDO'] = f'{sudo}'
         log.debug('REQUEST: %s %s %r %r', method.__name__.upper(), url, headers, command.call_args)
         # Timeout to prevent indefinitely hanging requests. 60s is very conservative,
         # but should be short enough to not cause any practical annoyances. We just
@@ -216,7 +216,7 @@ class Resource:
         return self._api
 
     def __repr__(self):
-        return '{0.__class__.__name__}({0._api}, {0.info})'.format(self)
+        return f'{self.__class__.__name__}({self._api}, {self.info})'
 
 
 class Version(namedtuple('Version', 'release edition')):
@@ -236,4 +236,5 @@ class Version(namedtuple('Version', 'release edition')):
         return self.edition == 'ee'
 
     def __str__(self):
-        return '%s-%s' % ('.'.join(map(str, self.release)), self.edition)
+        release = '.'.join(map(str, self.release))
+        return f'{release}-{self.edition}'

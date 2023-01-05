@@ -26,7 +26,7 @@ class User(gitlab.Resource):
 
     @classmethod
     def fetch_by_id(cls, user_id, api):
-        info = api.call(GET('/users/%s' % user_id))
+        info = api.call(GET(f'/users/{user_id}'))
         return cls(api, info)
 
     @classmethod

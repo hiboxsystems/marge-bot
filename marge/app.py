@@ -28,7 +28,7 @@ def time_interval(str_interval):
         return timedelta(**{translate[unit or 's']: float(quant)})
     except (AttributeError, ValueError) as err:
         raise configargparse.ArgumentTypeError(
-                'Invalid time interval (e.g. 12[s|min|h]): %s' % str_interval
+            f'Invalid time interval (e.g. 12[s|min|h]): {str_interval}'
         ) from err
 
 
@@ -38,7 +38,7 @@ def _parse_config(args):  # pylint: disable=too-many-statements
         try:
             return re.compile(str_regex)
         except re.error as err:
-            raise configargparse.ArgumentTypeError('Invalid regexp: %r (%s)' % (str_regex, err.msg))
+            raise configargparse.ArgumentTypeError(f'Invalid regexp: {str_regex} ({err.msg})')
 
     parser = configargparse.ArgParser(
         auto_env_var_prefix='MARGE_',
@@ -258,7 +258,7 @@ def _parse_config(args):  # pylint: disable=too-many-statements
         ]
         for flag in conflicting_flag:
             if getattr(config, flag[2:].replace("-", "_")):
-                raise MargeBotCliArgError('--rebase-remotely and %s are mutually exclusive' % flag)
+                raise MargeBotCliArgError(f'--rebase-remotely and {flag} are mutually exclusive')
 
     cli_args = []
     # pylint: disable=protected-access
@@ -266,7 +266,7 @@ def _parse_config(args):  # pylint: disable=too-many-statements
         cli_args.extend(value)
     for bad_arg in ['--auth-token', '--ssh-key']:
         if any(bad_arg in arg for arg in cli_args):
-            raise MargeBotCliArgError('"%s" can only be set via ENV var or config file.' % bad_arg)
+            raise MargeBotCliArgError(f'"{bad_arg}" can only be set via ENV var or config file.')
     return config
 
 
@@ -319,7 +319,7 @@ def main(args=None):
             if version.release < (11, 6):
                 raise Exception(
                     "Need GitLab 11.6+ to use rebase through the API, "
-                    "but your instance is {}".format(version)
+                    f"but your instance is {version}"
                 )
             fusion = bot.Fusion.gitlab_rebase
         else:

@@ -25,7 +25,7 @@ class Pipeline(gitlab.Resource):
         if status is not None:
             params['status'] = status
         pipelines_info = api.call(GET(
-            '/projects/{project_id}/pipelines'.format(project_id=project_id),
+            f'/projects/{project_id}/pipelines',
             params,
         ))
 
@@ -35,9 +35,7 @@ class Pipeline(gitlab.Resource):
     def pipelines_by_merge_request(cls, project_id, merge_request_iid, api):
         """Fetch all pipelines for a merge request in descending order of pipeline ID."""
         pipelines_info = api.call(GET(
-            '/projects/{project_id}/merge_requests/{merge_request_iid}/pipelines'.format(
-                project_id=project_id, merge_request_iid=merge_request_iid,
-            )
+            f'/projects/{project_id}/merge_requests/{merge_request_iid}/pipelines'
         ))
         pipelines_info.sort(key=lambda pipeline_info: pipeline_info['id'], reverse=True)
         return [cls(api, pipeline_info, project_id) for pipeline_info in pipelines_info]
@@ -64,5 +62,5 @@ class Pipeline(gitlab.Resource):
 
     def cancel(self):
         return self._api.call(POST(
-            '/projects/{0.project_id}/pipelines/{0.id}/cancel'.format(self),
+            f'/projects/{self.project_id}/pipelines/{self.id}/cancel',
         ))

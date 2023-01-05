@@ -56,9 +56,7 @@ class MergeJob:
         if not approvals.sufficient:
             raise CannotMerge(
                 'Insufficient approvals '
-                '(need {0} more)'.format(
-                    approvals.approvals_required - len(approvals.approver_usernames)
-                )
+                f'(need {approvals.approvals_required - len(approvals.approver_usernames)} more)'
             )
 
         if not merge_request.blocking_discussions_resolved:
@@ -67,8 +65,8 @@ class MergeJob:
         state = merge_request.state
         if state not in ('opened', 'reopened', 'locked'):
             if state in ('merged', 'closed'):
-                raise SkipMerge('The merge request is already {}!'.format(state))
-            raise CannotMerge('The merge request is in an unknown state: {}'.format(state))
+                raise SkipMerge(f'The merge request is already {state}!')
+            raise CannotMerge(f'The merge request is in an unknown state: {state}')
 
         if self.during_merge_embargo():
             raise SkipMerge('Merge embargo!')
@@ -82,8 +80,7 @@ class MergeJob:
 
         # add Reviewed-by
         should_add_reviewers = (
-            self._options.add_reviewers and
-            self._options.fusion is not Fusion.gitlab_rebase
+            self._options.add_reviewers and self._options.fusion is not Fusion.gitlab_rebase
         )
         reviewers = (
             _get_reviewer_names_and_emails(
@@ -104,13 +101,13 @@ class MergeJob:
 
         # add Tested-by
         should_add_tested = (
-            self._options.add_tested and
-            self._project.only_allow_merge_if_pipeline_succeeds and
-            self._options.fusion is Fusion.rebase
+            self._options.add_tested
+            and self._project.only_allow_merge_if_pipeline_succeeds
+            and self._options.fusion is Fusion.rebase
         )
 
         tested_by = (
-            ['{0._user.name} <{1.web_url}>'.format(self, merge_request)]
+            [f'{self._user.name} <{merge_request.web_url}>']
             if should_add_tested
             else None
         )
@@ -124,11 +121,10 @@ class MergeJob:
 
         # add Part-of
         should_add_parts_of = (
-            self._options.add_part_of and
-            self._options.fusion is not Fusion.gitlab_rebase
+            self._options.add_part_of and self._options.fusion is not Fusion.gitlab_rebase
         )
         part_of = (
-            '<{0.web_url}>'.format(merge_request)
+            f'<{merge_request.web_url}>'
             if should_add_parts_of
             else None
         )
@@ -336,7 +332,7 @@ class MergeJob:
             # the sha from the remote target branch.
             target_sha = repo.get_commit_hash('origin/' + target_branch)
             if updated_sha == target_sha:
-                raise CannotMerge('these changes already exist in branch `{}`'.format(target_branch))
+                raise CannotMerge(f'these changes already exist in branch `{target_branch}`')
             final_sha = self.add_trailers(merge_request) if add_trailers else None
             final_sha = final_sha or updated_sha
             commits_rewrite_done = True
@@ -405,22 +401,22 @@ class MergeJob:
                 raise CannotMerge("Sorry, I can't modify protected branches!") from err
 
             change_type = "merged" if self.opts.fusion == Fusion.merge else "rebased"
-            raise CannotMerge('Failed to push %s changes, check my logs!' % change_type) from err
+            raise CannotMerge(f'Failed to push {change_type} changes, check my logs!') from err
 
     def synchronize_using_gitlab_rebase(self, merge_request, expected_sha=None):
         expected_sha = expected_sha or self._repo.get_commit_hash()
         try:
             merge_request.rebase()
         except MergeRequestRebaseFailed as err:
-            raise CannotMerge("GitLab failed to rebase the branch saying: {0[0]}".format(err.args)) from err
+            raise CannotMerge(f"GitLab failed to rebase the branch saying: {err.args[0]}") from err
         except TimeoutError as err:
             raise CannotMerge("GitLab was taking too long to rebase the branch...") from err
         except gitlab.ApiError as err:
             branch = Branch.fetch_by_name(
-                        merge_request.source_project_id,
-                        merge_request.source_branch,
-                        self._api,
-                     )
+                merge_request.source_project_id,
+                merge_request.source_branch,
+                self._api,
+            )
             if branch.protected:
                 raise CannotMerge("Sorry, I can't modify protected branches!") from err
             raise
@@ -439,7 +435,7 @@ def _get_reviewer_names_and_emails(commits, approvals, api):
     self_reviewed = {commit['author_email'] for commit in commits} & {user.email for user in users}
     if self_reviewed and len(users) <= 1:
         raise CannotMerge('Commits require at least one independent reviewer.')
-    return ['{0.name} <{0.email}>'.format(user) for user in users]
+    return [f'{user.name} <{user.email}>' for user in users]
 
 
 # pylint: disable=invalid-name
@@ -518,5 +514,5 @@ class GitLabRebaseResultMismatch(CannotMerge):
     def __init__(self, gitlab_sha, expected_sha):
         super().__init__(
             "GitLab rebase ended up with a different commit:"
-            "I expected %s but they got %s" % (expected_sha, gitlab_sha)
+            f"I expected {expected_sha} but they got {gitlab_sha}"
         )
