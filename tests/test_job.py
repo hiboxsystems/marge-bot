@@ -115,7 +115,7 @@ class TestJob:
             merge_job.ensure_mergeable_mr(merge_request)
 
         merge_request.fetch_approvals.assert_called_once()
-        assert 'Insufficient approvals' in str(exc_info.value)
+        assert 'Insufficient approvals (need ' in str(exc_info.value)
 
     def test_ensure_mergeable_mr_wip(self):
         merge_job = self.get_merge_job()
