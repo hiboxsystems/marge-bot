@@ -1,4 +1,4 @@
-FROM python:3.9-slim AS builder
+FROM python:3.10-slim AS builder
 
 ARG POETRY_VERSION=1.1.15
 RUN pip install poetry==$POETRY_VERSION
@@ -11,10 +11,10 @@ RUN poetry export -o requirements.txt && \
   poetry build
 
 
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 RUN apt-get update && apt-get install -y \
-  git-core \
+  git-core build-essential \
   && \
   rm -rf /var/lib/apt/lists/*
 
