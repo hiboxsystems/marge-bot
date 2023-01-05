@@ -56,8 +56,8 @@ class MergeJob:
         if not approvals.sufficient:
             raise CannotMerge(
                 'Insufficient approvals '
-                '(has {0} but needs {1})'.format(
-                    len(approvals.approver_usernames), approvals.approvals_required
+                '(need {0} more)'.format(
+                    approvals.approvals_required - len(approvals.approver_usernames)
                 )
             )
 
