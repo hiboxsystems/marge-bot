@@ -27,7 +27,7 @@ class SingleMergeJob(MergeJob):
         except SkipMerge as err:
             log.warning("Skipping MR !%s: %s", merge_request.info['iid'], err.reason)
         except CannotMerge as err:
-            message = "I couldn't merge this branch: %s" % err.reason
+            message = "I couldn't merge this MR: %s" % err.reason
             log.warning(message)
             self.unassign_from_mr(merge_request)
             merge_request.comment(message)

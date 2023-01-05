@@ -89,7 +89,7 @@ class BatchMergeJob(MergeJob):
             except CannotMerge as ex:
                 log.warning('Skipping unmergeable MR: "%s"', ex)
                 self.unassign_from_mr(merge_request)
-                merge_request.comment("I couldn't merge this branch: {}".format(ex))
+                merge_request.comment("I couldn't merge this MR: {}".format(ex))
             else:
                 mergeable_mrs.append(merge_request)
         return mergeable_mrs
@@ -322,7 +322,7 @@ class BatchMergeJob(MergeJob):
                     )
             except CannotBatch as err:
                 merge_request.comment(
-                    "I couldn't merge this branch: {error} I will retry later...".format(
+                    "I couldn't merge this MR: {error} I will retry later...".format(
                         error=str(err),
                     ),
                 )
@@ -332,7 +332,7 @@ class BatchMergeJob(MergeJob):
                 raise
             except CannotMerge as err:
                 self.unassign_from_mr(merge_request)
-                merge_request.comment("I couldn't merge this branch: %s" % err.reason)
+                merge_request.comment("I couldn't merge this MR: %s" % err.reason)
                 raise
 
         # Accept the batch MR

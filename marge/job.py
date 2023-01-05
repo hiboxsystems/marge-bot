@@ -56,7 +56,9 @@ class MergeJob:
         if not approvals.sufficient:
             raise CannotMerge(
                 'Insufficient approvals '
-                '(have: {0.approver_usernames} missing: {0.approvals_left})'.format(approvals)
+                '(has {0} but needs {1})'.format(
+                    len(approvals.approver_usernames), approvals.approvals_required
+                )
             )
 
         if not merge_request.blocking_discussions_resolved:
