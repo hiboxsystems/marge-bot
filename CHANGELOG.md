@@ -1,3 +1,8 @@
+  * 0.11.0:
+    - Forked to https://github.com/hiboxsystems/marge-bot
+    - Feature: Replace nix with poetry and pure Docker image (#10)
+    - Feature: Use Python 3.10 as runtime in Docker (#17)
+    - Fix: Improve rebase via API by including `include_rebase_in_progress` (#6)
   * 0.10.1:
     - Feature: Guarantee pipeline before merging
   * 0.10.0:
@@ -51,7 +56,7 @@
     - Feature: add `--batch` to better support repos with many daily MRs and slow-ish CI (#84, #116)
     - Fix: fix fuse() call when using experimental --use-merge-strategy to update source branch #102
     - Fix: Get latest CI status of a commit filtered by branch #96 (thanks to benjamb)
-    - Enhancement: Check MR is mergeable before accepting MR #117 
+    - Enhancement: Check MR is mergeable before accepting MR #117
   * 0.6.1:
     - Fix when target SHA is retrieved #92.
     - Replace word "gitlab" with "GitLab" #93.
