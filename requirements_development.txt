@@ -175,9 +175,9 @@ pytest-flake8==1.0.7 \
 pytest-pylint==0.18.0; python_version >= "3.5" \
     --hash=sha256:790c7a8019fab08e59bd3812db1657a01995a975af8b1c6ce95b9aa39d61da27 \
     --hash=sha256:b63aaf8b80ff33c8ceaa7f68323ed04102c7790093ccf6bdb261a4c2dc6fd564
-pytest-runner==5.3.0; python_version >= "3.6" \
-    --hash=sha256:ca3f58ff4957e8be6c54c55d575b235725cbbcf4dc0d5091c29c6444cfc8a5fe \
-    --hash=sha256:448959d9ada752de2b369cf05c1c0f9e6d2027e7d32441187c16c24c1d4d6e77
+pytest-runner==5.3.2; python_version >= "3.6" \
+    --hash=sha256:48934ec94301f6727d30615af1960539ff62063f6c9b71b7227174e51ba5fb34 \
+    --hash=sha256:c7d785ea6c612396c11ddbaf467764d2cc746ef96a713fbe1a296c221503b7c3
 pytest==7.0.1; python_version >= "3.6" \
     --hash=sha256:9ce3ff477af913ecf6321fe337b93a2c0dcf2a0a1439c43f5452112c1e4280db \
     --hash=sha256:e30905a0c131d3d94b89624a1cc5afec3e0ba2fbdb151867d8e0ebd49850f171
