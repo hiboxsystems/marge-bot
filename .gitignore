@@ -10,3 +10,7 @@ ENV/
 
 # Editor
 *.sw[po]
+
+# Development environment runtime
+development-config.yaml
+development-auth-token
