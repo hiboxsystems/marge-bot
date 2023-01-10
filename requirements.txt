@@ -192,7 +192,7 @@ snaptime==0.2.4 \
 typing-extensions==4.1.1; python_version < "3.8" and python_version >= "3.6" \
     --hash=sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2 \
     --hash=sha256:1a9462dcc3347a79b1f1c0271fbe79e844580bb598bafa1ed208b94da3cdcd42
-tzdata==2022.7; platform_system == "Windows" and python_version >= "3.6" and (python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.6") \
+tzdata==2022.7; python_version >= "2" \
     --hash=sha256:2b88858b0e3120792a3c0635c23daf36a7d7eeeca657c323da299d2094402a0d \
     --hash=sha256:fe5f866eddd8b96e9fcba978f8e503c909b19ea7efda11e52e39494bad3a7bfa
 tzlocal==4.2; python_version >= "3.6" \
