@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Marge",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "marge",
+            "args": [
+                "--config-file=development-config.yaml"
+            ]
+        },
+        {
+            "name": "pytest",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "module": "pytest",
+            "args": []
+        }
+    ]
+}
