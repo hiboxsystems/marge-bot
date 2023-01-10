@@ -27,7 +27,7 @@ class SingleMergeJob(MergeJob):
         except SkipMerge as err:
             log.warning("Skipping MR !%s: %s", merge_request.info['iid'], err.reason)
         except CannotMerge as err:
-            message = "I couldn't merge this merge request: %s" % err.reason
+            message = f"I couldn't merge this merge request: {err.reason}"
             log.warning(message)
             self.unassign_from_mr(merge_request)
             merge_request.comment(message)
@@ -120,7 +120,7 @@ class SingleMergeJob(MergeJob):
                 # unexpected went wrong in either case, we expect the user to
                 # explicitly re-assign to marge (after resolving potential
                 # problems)
-                raise CannotMerge('Merge request was rejected by GitLab: %r' % err.error_message) from err
+                raise CannotMerge(f'Merge request was rejected by GitLab: {err.error_message}') from err
             except gitlab.Unauthorized as err:
                 log.warning('Unauthorized!')
                 raise CannotMerge('My user cannot accept merge requests!') from err

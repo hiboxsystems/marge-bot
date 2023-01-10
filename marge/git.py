@@ -19,14 +19,14 @@ GIT_SSH_COMMAND = "ssh -o StrictHostKeyChecking=no "
 
 
 def _filter_branch_script(trailer_name, trailer_values):
-    filter_script = 'TRAILERS={trailers} python3 {script}'.format(
-        trailers=shlex.quote(
-            '\n'.join(
-                '{}: {}'.format(trailer_name, trailer_value)
-                for trailer_value in trailer_values or [''])
-        ),
-        script=trailerfilter.__file__,
+    trailers = shlex.quote(
+        '\n'.join(
+            f'{trailer_name}: {trailer_value}'
+            for trailer_value in trailer_values or ['']
+        )
     )
+
+    filter_script = f'TRAILERS={trailers} python3 {trailerfilter.__file__}'
     return filter_script
 
 
@@ -148,7 +148,7 @@ class Repo(namedtuple('Repo', 'remote_url local_path ssh_key_file timeout refere
             source = 'origin'
         force_flag = '--force' if force else ''
         skip_flag = ('-o', 'ci.skip') if skip_ci else ()
-        self.git('push', force_flag, *skip_flag, source, '%s:%s' % (branch, branch))
+        self.git('push', force_flag, *skip_flag, source, f'{branch}:{branch}')
 
     def get_commit_hash(self, rev='HEAD'):
         """Return commit hash for `rev` (default "HEAD")."""
@@ -156,7 +156,7 @@ class Repo(namedtuple('Repo', 'remote_url local_path ssh_key_file timeout refere
         return result.stdout.decode('ascii').strip()
 
     def get_remote_url(self, name):
-        return self.git('config', '--get', 'remote.{}.url'.format(name)).stdout.decode('utf-8').strip()
+        return self.git('config', '--get', f'remote.{name}.url').stdout.decode('utf-8').strip()
 
     def git(self, *args, from_repo=True):
         env = None

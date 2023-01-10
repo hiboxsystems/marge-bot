@@ -237,7 +237,7 @@ class TestMergeRequest:
 
     def test_fetch_all_opened_for_me(self):
         api = self.api
-        mr1, mr_not_me, mr2 = INFO, dict(INFO, assignees=[{'id': _MARGE_ID+1}], id=679), dict(INFO, id=678)
+        mr1, mr_not_me, mr2 = INFO, dict(INFO, assignees=[{'id': _MARGE_ID + 1}], id=679), dict(INFO, id=678)
         user = marge.user.User(api=None, info=dict(USER_INFO, id=_MARGE_ID))
         api.collect_all_pages = Mock(return_value=[mr1, mr_not_me, mr2])
         result = MergeRequest.fetch_all_open_for_user(

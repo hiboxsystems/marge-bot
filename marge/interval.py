@@ -28,7 +28,7 @@ def find_weekday(string_or_day):
     if isinstance(string_or_day, str):
         return _DAY_NAMES[string_or_day.lower()]
 
-    raise ValueError('Not a week day: %r' % string_or_day)
+    raise ValueError(f'Not a week day: {repr(string_or_day)}')
 
 
 class WeeklyInterval:

@@ -3,7 +3,7 @@ import os
 import re
 import shlex
 import subprocess
-import unittest.mock as mock
+from unittest import mock
 
 import pytest
 
@@ -183,20 +183,19 @@ class TestRepo:
     def test_passes_ssh_key(self, mocked_run):
         repo = self.repo._replace(ssh_key_file='/foo/id_rsa')
         repo.config_user_info('bart', 'bart@gmail.com')
-        git_ssh = "GIT_SSH_COMMAND='%s -F /dev/null -o IdentitiesOnly=yes -i /foo/id_rsa'" % (
-            GIT_SSH_COMMAND,
-        )
+        git_ssh = f"GIT_SSH_COMMAND='{GIT_SSH_COMMAND} -F /dev/null -o IdentitiesOnly=yes -i /foo/id_rsa'"
+
         assert get_calls(mocked_run) == [
-            '%s git -C /tmp/local/path config user.email bart@gmail.com' % git_ssh,
-            '%s git -C /tmp/local/path config user.name bart' % git_ssh,
+            f'{git_ssh} git -C /tmp/local/path config user.email bart@gmail.com',
+            f'{git_ssh} git -C /tmp/local/path config user.name bart',
         ]
 
     def test_passes_reference_repo(self, mocked_run):
         repo = self.repo._replace(reference='/foo/reference_repo')
         repo.clone()
         assert get_calls(mocked_run) == [
-            'git clone --origin=origin --reference=/foo/reference_repo ssh://git@git.foo.com/some/repo.git ' +
-            '/tmp/local/path',
+            'git clone --origin=origin --reference=/foo/reference_repo ssh://git@git.foo.com/some/repo.git '
+            + '/tmp/local/path',
         ]
 
 

@@ -1,4 +1,4 @@
-import marge.gitlab as gitlab
+from marge import gitlab
 
 
 class TestVersion:

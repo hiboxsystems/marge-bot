@@ -19,11 +19,6 @@ disable=bad-continuation,
 [SIMILARITIES]
 min-similarity-lines=10
 
-[TYPECHECK]
-# this can be removed when we bump to asteroid >1.6.1
-# see: https://github.com/PyCQA/astroid/pull/487/files
-ignored-classes=Popen
-
 [FORMAT]
 max-line-length=110
 
