@@ -74,11 +74,11 @@ class Bot:
             big_sleep = max(0,
                             min_time_to_sleep_after_iterating_all_projects_in_secs
                             - time_to_sleep_between_projects_in_secs * len(projects))
-            log.info('Sleeping for %s seconds...', big_sleep)
+            log.debug('Sleeping for %s seconds...', big_sleep)
             time.sleep(big_sleep)
 
     def _get_projects(self):
-        log.info('Finding out my current projects...')
+        log.debug('Finding out my current projects...')
         my_projects = Project.fetch_all_mine(self._api)
         project_regexp = self._config.project_regexp
         filtered_projects = [p for p in my_projects if project_regexp.match(p.path_with_namespace)]
@@ -148,7 +148,7 @@ class Bot:
 
     def _process_merge_requests(self, repo_manager, project, merge_requests):
         if not merge_requests:
-            log.info('Nothing to merge at this point...')
+            log.debug('Nothing to merge at this point...')
             return
 
         try:
