@@ -389,7 +389,8 @@ automatically restart marge-bot in case of intermittent GitLab problems.
 
 1. Install `poetry` with `pip install poetry`.
 2. Check out this repository.
-3. Run `poetry install` in the repository root.
+3. Run `poetry config virtualenvs.in-project true` to set up the venv in the project folder.
+4. Run `poetry install` in the repository root.
 
 ### Running linting and tests
 

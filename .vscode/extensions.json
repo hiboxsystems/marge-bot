@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "ms-python.vscode-pylance",
+        "pamaron.pytest-runner",
+        "zeshuaro.vscode-python-poetry"
+    ]
+}

@@ -4,6 +4,7 @@ ENV/
 *.egg-info
 .coverage
 .pytest_cache
+.venv
 /MANIFEST
 /build/
 /dist/

@@ -5,8 +5,10 @@
             "name": "Marge",
             "type": "python",
             "request": "launch",
+            "python": "${workspaceFolder}/.venv/bin/python",
             "cwd": "${workspaceFolder}",
             "module": "marge",
+            "justMyCode": false,
             "args": [
                 "--config-file=development-config.yaml"
             ]
@@ -15,8 +17,10 @@
             "name": "pytest",
             "type": "python",
             "request": "launch",
+            "python": "${workspaceFolder}/.venv/bin/python",
             "cwd": "${workspaceFolder}",
             "module": "pytest",
+            "justMyCode": false,
             "args": []
         }
     ]
