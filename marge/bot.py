@@ -63,7 +63,7 @@ class Bot:
         min_time_to_sleep_after_iterating_all_projects_in_secs = 30
         while True:
             projects = self._get_projects()
-            self._process_projects(
+            processed_merge_requests = self._process_projects(
                 repo_manager,
                 time_to_sleep_between_projects_in_secs,
                 projects,
@@ -71,11 +71,12 @@ class Bot:
             if self._config.cli:
                 return
 
-            big_sleep = max(0,
-                            min_time_to_sleep_after_iterating_all_projects_in_secs
-                            - time_to_sleep_between_projects_in_secs * len(projects))
-            log.debug('Sleeping for %s seconds...', big_sleep)
-            time.sleep(big_sleep)
+            if processed_merge_requests == 0:
+                big_sleep = max(0,
+                                min_time_to_sleep_after_iterating_all_projects_in_secs
+                                - time_to_sleep_between_projects_in_secs * len(projects))
+                log.debug('Sleeping for %s seconds...', big_sleep)
+                time.sleep(big_sleep)
 
     def _get_projects(self):
         log.debug('Finding out my current projects...')
@@ -100,6 +101,9 @@ class Bot:
         time_to_sleep_between_projects_in_secs,
         projects,
     ):
+        """Returns the number of processed merge requests."""
+        processed_merge_requests = 0
+
         for project in projects:
             project_name = project.path_with_namespace
 
@@ -107,8 +111,11 @@ class Bot:
                 log.warning("Don't have enough permissions to browse merge requests in %s!", project_name)
                 continue
             merge_requests = self._get_merge_requests(project, project_name)
+            processed_merge_requests += len(merge_requests)
             self._process_merge_requests(repo_manager, project, merge_requests)
             time.sleep(time_to_sleep_between_projects_in_secs)
+
+        return processed_merge_requests
 
     def _get_merge_requests(self, project, project_name):
         log.info('Fetching merge requests assigned to me in %s...', project_name)
