@@ -3,9 +3,9 @@
     "yaml.schemas": {
         "https://json.schemastore.org/github-workflow.json": ".github/workflows/deploy.yml"
     },
+    "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
-        "tests"
+        "tests",
+        "--no-cov"
     ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
 }
