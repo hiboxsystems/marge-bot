@@ -21,7 +21,10 @@
             "cwd": "${workspaceFolder}",
             "module": "pytest",
             "justMyCode": false,
-            "args": []
+            "args": [],
+            "env": {
+                "PYTEST_ADDOPTS": "--no-cov"
+            }
         }
     ]
 }
