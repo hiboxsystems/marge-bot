@@ -134,6 +134,26 @@ class SingleMergeJob(MergeJob):
                     merge_when_pipeline_succeeds=bool(target_project.only_allow_merge_if_pipeline_succeeds),
                 )
                 log.info('merge_request.accept result: %s', ret)
+            except gitlab.Unprocessable as err:
+                merge_request.refetch_info()
+
+                target_branch = Branch.fetch_by_name(
+                    merge_request.target_project_id,
+                    merge_request.target_branch,
+                    self._api,
+                )
+
+                target_sha = target_branch.commit_id
+
+                if target_branch.commit_id != merge_request.diff_refs_base_sha:
+                    log.info('Someone was naughty and by-passed Marge')
+                    merge_request.comment(
+                        "My job would be easier if people didn't jump the queue and merged directly... *sigh*"
+                    )
+                    continue
+
+                log.exception('Unanticipated Unprocessable error from GitLab on merge attempt')
+                raise CannotMerge('GitLab did not accept the merge request (422), check my logs...') from err
             except gitlab.NotAcceptable as err:
                 new_target_sha = Commit.last_on_branch(self._project.id, merge_request.target_branch, api).id
                 # target_branch has moved under us since we updated, just try again
