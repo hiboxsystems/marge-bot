@@ -14,7 +14,8 @@ class Approvals(gitlab.Resource):
             # GitLab botched the v4 api before 9.2.3
             approver_url = f'/projects/{self.project_id}/merge_requests/{self.id}/approvals'
 
-        if gitlab_version.is_ee:
+        # Approvals are in CE since 13.2
+        if gitlab_version.is_ee or gitlab_version.release >= (13, 2, 0):
             self._info = self._api.call(GET(approver_url))
         else:
             self._info = dict(self._info, approvals_left=0, approved_by=[])
@@ -33,11 +34,11 @@ class Approvals(gitlab.Resource):
 
     @property
     def approvals_left(self):
-        return self.info['approvals_left'] or 0
+        return self.info.get("approvals_left", 0) or 0
 
     @property
     def sufficient(self):
-        return not self.info['approvals_left']
+        return not self.approvals_left
 
     @property
     def approver_usernames(self):
