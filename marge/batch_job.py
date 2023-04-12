@@ -199,12 +199,10 @@ class BatchMergeJob(MergeJob):
             pipeline.cancel()
 
         if merge_request.force_remove_source_branch:
+            source_branch = quote(merge_request.source_branch, safe="")
             self._api.call(
                 DELETE(
-                    'projects/{}/repository/branches/{}'.format(
-                        merge_request.source_project_id,
-                        quote(merge_request.source_branch, safe='')
-                    )
+                    f'projects/{merge_request.source_project_id}/repository/branches/{source_branch}'
                 )
             )
 
