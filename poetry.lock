@@ -264,6 +264,18 @@ fasttext = ["fasttext"]
 langdetect = ["langdetect"]
 
 [[package]]
+name = "decorator"
+version = "5.1.1"
+description = "Decorators for Humans"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
+    {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
+]
+
+[[package]]
 name = "dill"
 version = "0.3.6"
 description = "serialize all of python"
@@ -894,6 +906,20 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+name = "retry2"
+version = "0.9.5"
+description = "Easy to use retry decorator."
+category = "main"
+optional = false
+python-versions = ">=2.6"
+files = [
+    {file = "retry2-0.9.5-py2.py3-none-any.whl", hash = "sha256:f7fee13b1e15d0611c462910a6aa72a8919823988dd0412152bc3719c89a4e55"},
+]
+
+[package.dependencies]
+decorator = ">=3.4.2"
+
+[[package]]
 name = "setuptools"
 version = "67.6.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -1160,4 +1186,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "d6bd0c6e71a5dc215d52bd0f54c90100d123c0d7cf305e724bfc81938e29b8b8"
+content-hash = "fd421c6e0cbd57aee9fb645696d6e544d5f7cae1962de30e50fa126e7daf0a02"
