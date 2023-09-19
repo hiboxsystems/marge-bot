@@ -1,3 +1,15 @@
+  * 0.12.0:
+    - Add a retry mechanism on all API calls (#4)
+    - Update poetry to 1.4.2 (#40)
+    - Remove source branches in batch jobs if necessary (#37)
+    - Support approval on CE 13.2+ (#38)
+    - Fix debugging tests by disabling code coverage (#36)
+    - Update package versions for Python 3.7+ (#35)
+    - Drop Python 3.6 support (#34)
+    - Avoid sleeping if an MR was handled (#32)
+    - Less logging by default (#31)
+    - Various dependency bumps (#18, #22, #23, #24, #25, #26, #27)
+    - Improve message for insufficient approvers (#21)
   * 0.11.0:
     - Forked to https://github.com/hiboxsystems/marge-bot
     - Feature: Replace nix with poetry and pure Docker image (#10)
