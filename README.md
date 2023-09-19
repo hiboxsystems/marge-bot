@@ -1,8 +1,19 @@
 # Marge-bot [![Test](https://github.com/smarkets/marge-bot/actions/workflows/test.yml/badge.svg)](https://github.com/smarkets/marge-bot/actions/workflows/test.yml)
 
+### Note about this fork and others
+
 > This project is a friendly fork of https://github.com/smarkets/marge-bot, trying
 > to incorporate currently unmerged merge requests from the community. Our fork is
 > published to Docker Hub here: https://hub.docker.com/r/hiboxsystems/marge-bot
+>
+> See also https://gitlab.com/marge-org/marge-bot for another fork which
+> describes itself like this:
+>
+> _This is a community-driven fork of the now-unmaintained upstream repository,
+> aimed at reviving the project. See
+> https://github.com/smarkets/marge-bot/issues/295 for context._
+
+### Original README content
 
 Marge-bot is a merge-bot for GitLab that, beside other goodies,
 implements
