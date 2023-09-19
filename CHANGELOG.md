@@ -1,3 +1,5 @@
+  * 0.12.1:
+    - Downgrade PyYAML to fix build issue (#41)
   * 0.12.0:
     - Add a retry mechanism on all API calls (#4)
     - Update poetry to 1.4.2 (#40)
