@@ -13,6 +13,9 @@
 > aimed at reviving the project. See
 > https://github.com/smarkets/marge-bot/issues/295 for context._
 
+We have also created an additional tool which might be useful for people using Margebot and Slack:
+https://github.com/hiboxsystems/marge-bot-slack-tool
+
 ### Original README content
 
 Marge-bot is a merge-bot for GitLab that, beside other goodies,
