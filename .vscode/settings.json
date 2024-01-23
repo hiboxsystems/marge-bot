@@ -8,4 +8,5 @@
         "tests",
         "--no-cov"
     ],
+    "python.testing.unittestEnabled": false,
 }

@@ -409,6 +409,8 @@ automatically restart marge-bot in case of intermittent GitLab problems.
 ### Running linting and tests
 
 ```shell
+poetry run flake8 marge tests
+poetry run pylint marge tests
 poetry run pytest
 ```
 
