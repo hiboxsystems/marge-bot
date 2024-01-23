@@ -1,5 +1,7 @@
 [MASTER]
+ignore-paths=.venv
 persistent=no
+jobs=0
 
 [BASIC]
 include-naming-hint=yes
