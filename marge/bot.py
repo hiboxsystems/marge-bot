@@ -31,11 +31,21 @@ class Bot:
             )
 
     def start(self):
+        skip_clone = self._config.merge_opts.fusion is Fusion.gitlab_rebase
         with TemporaryDirectory() as root_dir:
-            if self._config.use_https:
+            if self._config.use_only_gitlab_api:
+                repo_manager = store.ApiOnlyRepoManager(
+                    user=self.user,
+                    root_dir=root_dir,
+                    skip_clone=skip_clone,
+                    timeout=self._config.git_timeout,
+                    reference=self._config.git_reference_repo,
+                )
+            elif self._config.use_https:
                 repo_manager = store.HttpsRepoManager(
                     user=self.user,
                     root_dir=root_dir,
+                    skip_clone=skip_clone,
                     auth_token=self._config.auth_token,
                     timeout=self._config.git_timeout,
                     reference=self._config.git_reference_repo,
@@ -44,6 +54,7 @@ class Bot:
                 repo_manager = store.SshRepoManager(
                     user=self.user,
                     root_dir=root_dir,
+                    skip_clone=skip_clone,
                     ssh_key_file=self._config.ssh_key_file,
                     timeout=self._config.git_timeout,
                     reference=self._config.git_reference_repo,
@@ -165,7 +176,7 @@ class Bot:
             raise
 
         log.info('Got %s requests to merge;', len(merge_requests))
-        if self._config.batch and len(merge_requests) > 1:
+        if self._config.batch and len(merge_requests) > 1 and not self._config.use_only_gitlab_api:
             log.info('Attempting to merge as many MRs as possible using BatchMergeJob...')
             batch_merge_job = batch_job.BatchMergeJob(
                 api=self._api,
@@ -173,6 +184,7 @@ class Bot:
                 project=project,
                 merge_requests=merge_requests,
                 repo=repo,
+                config=self._config,
                 options=self._config.merge_opts,
             )
             try:
@@ -185,28 +197,34 @@ class Bot:
                 return
             except git.GitError as err:
                 log.exception('BatchMergeJob failed: %s', err)
+
         log.info('Attempting to merge the oldest MR...')
         merge_request = merge_requests[0]
         merge_job = self._get_single_job(
-            project=project, merge_request=merge_request, repo=repo,
+            project=project,
+            merge_request=merge_request,
+            repo=repo,
+            config=self._config,
             options=self._config.merge_opts,
         )
         merge_job.execute()
 
-    def _get_single_job(self, project, merge_request, repo, options):
+    def _get_single_job(self, project, merge_request, repo, config, options):
         return single_merge_job.SingleMergeJob(
             api=self._api,
             user=self.user,
             project=project,
             merge_request=merge_request,
             repo=repo,
+            config=config,
             options=options,
         )
 
 
 class BotConfig(namedtuple('BotConfig',
                            'user use_https auth_token ssh_key_file project_regexp merge_order merge_opts '
-                           + 'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli')):
+                           + 'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli '
+                           + 'use_only_gitlab_api')):
     pass
 
 

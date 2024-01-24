@@ -3,15 +3,17 @@ import logging as log
 import time
 from datetime import datetime
 
+from marge.branch import Branch
+
 from . import git, gitlab
 from .commit import Commit
-from .job import CannotMerge, GitLabRebaseResultMismatch, MergeJob, SkipMerge
+from .job import CannotMerge, Fusion, GitLabRebaseResultMismatch, MergeJob, SkipMerge
 
 
 class SingleMergeJob(MergeJob):
 
-    def __init__(self, *, api, user, project, repo, options, merge_request):
-        super().__init__(api=api, user=user, project=project, repo=repo, options=options)
+    def __init__(self, *, api, user, project, repo, config, options, merge_request):
+        super().__init__(api=api, user=user, project=project, repo=repo, config=config, options=options)
         self._merge_request = merge_request
         self._options = options
 
@@ -49,46 +51,71 @@ class SingleMergeJob(MergeJob):
 
         while not updated_into_up_to_date_target_branch:
             self.ensure_mergeable_mr(merge_request)
-            source_project, source_repo_url, _ = self.fetch_source_project(merge_request)
+
             target_project = self.get_target_project(merge_request)
-            try:
-                # NB. this will be a no-op if there is nothing to update/rewrite
 
-                target_sha, _updated_sha, actual_sha = self.update_from_target_branch_and_push(
-                    merge_request,
-                    source_repo_url=source_repo_url,
+            if self._config.use_only_gitlab_api and self._options.fusion is Fusion.gitlab_rebase:
+                target_branch = Branch.fetch_by_name(
+                    merge_request.target_project_id,
+                    merge_request.target_branch,
+                    self._api,
                 )
-            except GitLabRebaseResultMismatch as err:
-                if first_iteration:
-                    log.info(
-                        "Gitlab rebase didn't give expected result."
-                        "This is expected immediately after rebase. Retrying."
+
+                target_sha = target_branch.commit_id
+
+                if target_branch.commit_id != merge_request.diff_refs_base_sha:
+                    actual_sha = self.synchronize_using_gitlab_rebase(
+                        merge_request,
+                        verify_expected_sha=False
                     )
-                    first_iteration = False
+
+                    log.info(
+                        'Rebased, merging %r into %r',
+                        actual_sha,
+                        target_sha
+                    )
                 else:
-                    log.info("Gitlab rebase didn't give expected result: %r", err.reason)
-                    merge_request.comment("Someone skipped the queue! Will have to try again...")
-                continue
+                    actual_sha = merge_request.sha
+            else:
+                source_project, source_repo_url, _ = self.fetch_source_project(merge_request)
+                try:
+                    # NB. this will be a no-op if there is nothing to update/rewrite
 
-            if _updated_sha == actual_sha and self._options.guarantee_final_pipeline:
-                log.info('No commits on target branch to fuse, triggering pipeline...')
-                merge_request.comment("jenkins retry")
-                time.sleep(30)
+                    target_sha, _updated_sha, actual_sha = self.update_from_target_branch_and_push(
+                        merge_request,
+                        source_repo_url=source_repo_url,
+                    )
+                except GitLabRebaseResultMismatch as err:
+                    if first_iteration:
+                        log.info(
+                            "Gitlab rebase didn't give expected result."
+                            "This is expected immediately after rebase. Retrying."
+                        )
+                        first_iteration = False
+                    else:
+                        log.info("Gitlab rebase didn't give expected result: %r", err.reason)
+                        merge_request.comment("Someone skipped the queue! Will have to try again...")
+                    continue
 
-            log.info(
-                'Commit id to merge %r into: %r (updated sha: %r)',
-                actual_sha,
-                target_sha,
-                _updated_sha
-            )
-            time.sleep(5)
+                if _updated_sha == actual_sha and self._options.guarantee_final_pipeline:
+                    log.info('No commits on target branch to fuse, triggering pipeline...')
+                    merge_request.comment("jenkins retry")
+                    time.sleep(30)
 
-            sha_now = Commit.last_on_branch(source_project.id, merge_request.source_branch, api).id
-            # Make sure no-one managed to race and push to the branch in the
-            # meantime, because we're about to impersonate the approvers, and
-            # we don't want to approve unreviewed commits
-            if sha_now != actual_sha:
-                raise CannotMerge('Someone pushed to branch while we were trying to merge')
+                log.info(
+                    'Commit id to merge %r into: %r (updated sha: %r)',
+                    actual_sha,
+                    target_sha,
+                    _updated_sha
+                )
+                time.sleep(5)
+
+                sha_now = Commit.last_on_branch(source_project.id, merge_request.source_branch, api).id
+                # Make sure no-one managed to race and push to the branch in the
+                # meantime, because we're about to impersonate the approvers, and
+                # we don't want to approve unreviewed commits
+                if sha_now != actual_sha:
+                    raise CannotMerge('Someone pushed to branch while we were trying to merge')
 
             self.maybe_reapprove(merge_request, approvals)
 
@@ -107,6 +134,26 @@ class SingleMergeJob(MergeJob):
                     merge_when_pipeline_succeeds=bool(target_project.only_allow_merge_if_pipeline_succeeds),
                 )
                 log.info('merge_request.accept result: %s', ret)
+            except gitlab.Unprocessable as err:
+                merge_request.refetch_info()
+
+                target_branch = Branch.fetch_by_name(
+                    merge_request.target_project_id,
+                    merge_request.target_branch,
+                    self._api,
+                )
+
+                target_sha = target_branch.commit_id
+
+                if target_branch.commit_id != merge_request.diff_refs_base_sha:
+                    log.info('Someone was naughty and by-passed Marge')
+                    merge_request.comment(
+                        "My job would be easier if people didn't jump the queue and merged directly... *sigh*"
+                    )
+                    continue
+
+                log.exception('Unanticipated Unprocessable error from GitLab on merge attempt')
+                raise CannotMerge('GitLab did not accept the merge request (422), check my logs...') from err
             except gitlab.NotAcceptable as err:
                 new_target_sha = Commit.last_on_branch(self._project.id, merge_request.target_branch, api).id
                 # target_branch has moved under us since we updated, just try again
@@ -140,7 +187,7 @@ class SingleMergeJob(MergeJob):
                 merge_request.refetch_info()
                 if merge_request.work_in_progress:
                     raise CannotMerge(
-                        'The request was marked as WIP as I was processing it (maybe a WIP commit?)'
+                        'The request was marked as Draft as I was processing it (maybe a Draft commit?)'
                     ) from ex
                 if merge_request.state == 'reopened':
                     raise CannotMerge(

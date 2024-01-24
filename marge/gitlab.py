@@ -115,7 +115,9 @@ class Api:
     def call(self, command, sudo=None):
         method = command.method
         url = self._api_base_url + command.endpoint
+
         headers = {'PRIVATE-TOKEN': self._auth_token}
+
         if sudo:
             headers['SUDO'] = f'{sudo}'
         log.debug('REQUEST: %s %s %r %r', method.__name__.upper(), url, headers, command.call_args)
