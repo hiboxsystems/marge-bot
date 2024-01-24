@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "marge"
-version = "0.12.1"
+version = "0.13.0"
 description = "Marge-bot is a merge-bot for GitLab that, beside other goodies, implements [the Not Rocket Science Rule Of Software Engineering](http://graydon2.dreamwidth.org/1597.html)."
 license = "BSD-3-Clause"
 authors = ["Infrastructure <infrastructure@smarkets.com>"]

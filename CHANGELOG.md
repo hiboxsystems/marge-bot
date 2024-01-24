@@ -1,3 +1,7 @@
+  * 0.13.0:
+    - Avoid all local git repository actions if rebasing through the GitLab API (#12)
+    - Use ci_timeout for merging (#45)
+    - chore(Dockerfile): hadolint best practices (#44)
   * 0.12.1:
     - Downgrade PyYAML to fix build issue (#41)
   * 0.12.0:
