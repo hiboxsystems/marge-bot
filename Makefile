@@ -27,11 +27,13 @@ docker-push:
 	else \
 		docker login; \
 	fi
-	docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:$(VERSION)
+
+	docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:latest; \
+	docker push hiboxsystems/marge-bot:latest;
+
 	if [ "$(VERSION)" = "$$(cat version)" ]; then \
-		docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:latest; \
+		docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:$(VERSION); \
 		docker tag hiboxsystems/marge-bot:$$(cat version) hiboxsystems/marge-bot:stable; \
+		docker push hiboxsystems/marge-bot:$(VERSION); \
 		docker push hiboxsystems/marge-bot:stable; \
-		docker push hiboxsystems/marge-bot:latest; \
 	fi
-	docker push hiboxsystems/marge-bot:$(VERSION)
