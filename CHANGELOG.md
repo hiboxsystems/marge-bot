@@ -1,3 +1,9 @@
+  * 0.14.0:
+    - Drop Python 3.7 support (#47)
+    - Update Poetry to 1.7 (#48)
+    - Remove requirements files (#49)
+    - chore(Dockerfile): missing ssh package (#50)
+    - Makefile: Improve `docker-push` target to always push `latest` (#51)
   * 0.13.0:
     - Avoid all local git repository actions if rebasing through the GitLab API (#12)
     - Use ci_timeout for merging (#45)
