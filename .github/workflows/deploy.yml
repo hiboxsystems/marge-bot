@@ -9,11 +9,13 @@ on:
 
 jobs:
   dockerhub:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: ${{ github.repository == 'smarkets/marge-bot' }}  # Only run from main repo
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
     - name: Dockerize
       run: make dockerize
     - name: Deploy to DockerHub
