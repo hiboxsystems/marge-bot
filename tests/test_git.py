@@ -79,7 +79,7 @@ class TestRepo:
                 raise subprocess.CalledProcessError(returncode=1, cmd='git rebase blah')
             if 'rev-parse' in args or 'reset' in args:
                 return mock.Mock()
-            raise Exception('Unexpected call:', args)
+            raise AssertionError('Unexpected call:', args)
 
         mocked_run.side_effect = fail_on_filter_branch
 

@@ -264,7 +264,7 @@ def test_config_file():
     with config_file() as config_file_name:
         with env(MARGE_AUTH_TOKEN="ADMIN-TOKEN"):
             with main(f'--config-file={config_file_name}') as bot:
-                admin_user_info = dict(**user_info)
+                admin_user_info = {**user_info}
                 admin_user_info['is_admin'] = True
                 assert bot.user.info == admin_user_info
                 assert bot.config.merge_opts != job.MergeJobOptions.default()
@@ -285,7 +285,7 @@ def test_config_overwrites():
     with config_file() as config_file_name:
         with env(MARGE_CI_TIMEOUT='20min', MARGE_AUTH_TOKEN="ADMIN-TOKEN"):
             with main(f'--git-timeout=100s --config-file={config_file_name}') as bot:
-                admin_user_info = dict(**user_info)
+                admin_user_info = {**user_info}
                 admin_user_info['is_admin'] = True
                 assert bot.user.info == admin_user_info
                 assert bot.config.merge_opts != job.MergeJobOptions.default()

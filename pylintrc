@@ -12,10 +12,8 @@ attr-rgx=(([a-z_][a-z0-9_]{2,40})|(_[a-z0-9_]*)|(__[a-z][a-z0-9_]+__))$
 argument-rgx=(([a-z_][a-z0-9_]{2,40})|(_[a-z0-9_]*)|(__[a-z][a-z0-9_]+__))$
 
 [MESSAGE CONTROL]
-disable=bad-continuation,
-        fixme,
+disable=fixme,
         missing-docstring,
-        no-self-use,
         unsubscriptable-object
 
 [SIMILARITIES]

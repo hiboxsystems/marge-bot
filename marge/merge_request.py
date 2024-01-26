@@ -219,11 +219,11 @@ class MergeRequest(gitlab.Resource):
     def accept(self, remove_branch=False, sha=None, merge_when_pipeline_succeeds=True):
         return self._api.call(PUT(
             f'/projects/{self.project_id}/merge_requests/{self.iid}/merge',
-            dict(
-                should_remove_source_branch=remove_branch,
-                merge_when_pipeline_succeeds=merge_when_pipeline_succeeds,
-                sha=sha or self.sha,  # if provided, ensures what is merged is what we want (or fails)
-            ),
+            {
+                'should_remove_source_branch': remove_branch,
+                'merge_when_pipeline_succeeds': merge_when_pipeline_succeeds,
+                'sha': sha or self.sha  # if provided, ensures what is merged is what we want (or fails)
+            },
         ))
 
     def close(self):

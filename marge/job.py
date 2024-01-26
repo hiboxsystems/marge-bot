@@ -426,14 +426,14 @@ class MergeJob:
             if branch.protected:
                 raise CannotMerge("Sorry, I can't modify protected branches!") from err
             raise
-        else:
-            if verify_expected_sha and merge_request.sha != expected_sha:
-                raise GitLabRebaseResultMismatch(
-                    gitlab_sha=merge_request.sha,
-                    expected_sha=expected_sha,
-                )
 
-            return merge_request.sha
+        if verify_expected_sha and merge_request.sha != expected_sha:
+            raise GitLabRebaseResultMismatch(
+                gitlab_sha=merge_request.sha,
+                expected_sha=expected_sha,
+            )
+
+        return merge_request.sha
 
 
 def _get_reviewer_names_and_emails(commits, approvals, api):
@@ -484,7 +484,7 @@ class MergeJobOptions(namedtuple('MergeJobOptions', JOB_OPTIONS)):
             approval_timeout=None, embargo=None, ci_timeout=None, fusion=Fusion.rebase,
             use_no_ff_batches=False, use_merge_commit_batches=False, skip_ci_batches=False,
             guarantee_final_pipeline=False,
-    ):
+    ):  # pylint: disable=too-many-arguments
         approval_timeout = approval_timeout or timedelta(seconds=0)
         embargo = embargo or IntervalUnion.empty()
         ci_timeout = ci_timeout or timedelta(minutes=15)

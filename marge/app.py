@@ -311,7 +311,7 @@ def main(args=None):
 
         if options.batch:
             if options.rebase_remotely:
-                raise Exception("Batch processing does not work together with rebase remotely.")
+                raise MargeBotCliArgError("Batch processing does not work together with rebase remotely.")
 
             logging.warning('Experimental batch mode enabled')
 
@@ -320,7 +320,7 @@ def main(args=None):
         elif options.rebase_remotely:
             version = api.version()
             if version.release < (11, 6):
-                raise Exception(
+                raise MargeBotCliArgError(
                     "Need GitLab 11.6+ to use rebase through the API, "
                     f"but your instance is {version}"
                 )
