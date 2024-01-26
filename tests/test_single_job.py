@@ -108,9 +108,11 @@ class SingleJobMockLab(MockLab):
             api.add_transition(
                 PUT(
                     f"/projects/1234/merge_requests/{self.merge_request_info['iid']}/merge",
-                    dict(sha=self.merge_request_info['sha'],
-                         should_remove_source_branch=True,
-                         merge_when_pipeline_succeeds=True),
+                    {
+                        'sha': self.merge_request_info['sha'],
+                        'should_remove_source_branch': True,
+                        'merge_when_pipeline_succeeds': True
+                    },
                 ),
                 Ok({}),
                 from_state=['pipeline-finished', 'skipped'], to_state='merged',
@@ -146,7 +148,11 @@ class SingleJobMockLab(MockLab):
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{self.merge_request_info['iid']}/merge",
-                dict(sha=rewritten_sha, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': rewritten_sha,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Ok({}),
             from_state=['passed', 'skipped'], to_state='merged',
@@ -404,10 +410,10 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
     def test_succeeds_if_source_is_master(self, mocks_factory):
         mocklab, api, job = mocks_factory(
-            extra_mocklab_opts=dict(merge_request_options={
+            extra_mocklab_opts={'merge_request_options': {
                 'source_branch': 'master',
                 'target_branch': 'production',
-            }),
+            }},
         )
 
         if job.opts.fusion is Fusion.gitlab_rebase:
@@ -581,11 +587,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(
-                    sha=first_rewritten_sha,
-                    should_remove_source_branch=True,
-                    merge_when_pipeline_succeeds=True,
-                ),
+                {
+                    'sha': first_rewritten_sha,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.NotAcceptable()),
             from_state='pushed_but_master_moved', to_state='merge_rejected',
@@ -645,7 +651,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(sha=expected_sha1, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.NotFound(404, {'message': '404 Branch Not Found'})),
             from_state='passed', to_state='someone_else_merged',
@@ -682,11 +692,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/{project_info['id']}/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(
-                    sha=expected_sha1,
-                    should_remove_source_branch=True,
-                    merge_when_pipeline_succeeds=only_allow_merge_if_pipeline_succeeds
-                ),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': only_allow_merge_if_pipeline_succeeds
+                },
             ),
             Ok(True),
             to_state='merged',
@@ -712,7 +722,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(sha=expected_sha1, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.MethodNotAllowed(405, {'message': '405 Method Not Allowed'})),
             from_state='passed', to_state='now_is_wip',
@@ -745,7 +759,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(sha=expected_sha1, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.MethodNotAllowed(405, {'message': '405 Method Not Allowed'})),
             from_state='passed', to_state='rejected_by_git_hook',
@@ -781,7 +799,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(sha=expected_sha1, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.MethodNotAllowed(405, {'message': '405 Method Not Allowed'})),
             from_state='passed', to_state='unresolved_discussions',
@@ -818,7 +840,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(sha=expected_sha1, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.MethodNotAllowed(405, {'message': '405 Method Not Allowed'})),
             from_state='passed', to_state='oops_someone_closed_it',
@@ -851,7 +877,11 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         api.add_transition(
             PUT(
                 f"/projects/1234/merge_requests/{mocklab.merge_request_info['iid']}/merge",
-                dict(sha=expected_sha1, should_remove_source_branch=True, merge_when_pipeline_succeeds=True),
+                {
+                    'sha': expected_sha1,
+                    'should_remove_source_branch': True,
+                    'merge_when_pipeline_succeeds': True
+                },
             ),
             Error(marge.gitlab.MethodNotAllowed(405, {'message': '405 Method Not Allowed'})),
             from_state='passed', to_state='rejected_for_mysterious_reasons',
@@ -900,7 +930,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
     def test_waits_for_approvals(self, mock_log, mocks_factory):
         five_secs = timedelta(seconds=5)
         mocklab, api, job = mocks_factory(
-            extra_opts=dict(approval_timeout=five_secs, reapprove=True)
+            extra_opts={'approval_timeout': five_secs, 'reapprove': True}
         )
 
         if job.opts.fusion is Fusion.gitlab_rebase:

@@ -49,8 +49,8 @@ class RepoMock(git.Repo):
         except Exception:
             log.warning('Failed to simulate: git %r %s', command, command_args)
             raise
-        else:
-            return self._pretend_result_comes_from_popen(result)
+
+        return self._pretend_result_comes_from_popen(result)
 
     @staticmethod
     def _pretend_result_comes_from_popen(result):
@@ -90,7 +90,7 @@ class GitModel:
 
         self.remote_repos = remote_repos
         self._local_repo = GitRepoModel()
-        self._remotes = dict(origin=origin)
+        self._remotes = {"origin": origin}
         self._remote_refs = {}
         self._branch = None
         self.on_push_callbacks = []

@@ -133,13 +133,13 @@ class Api(gitlab.Api):
                     return []
 
             raise MockedEndpointNotFound(command, sudo, self.state) from err
-        else:
-            if next_state:
-                self.state = next_state
 
-            if side_effect:
-                side_effect()
-            return response()
+        if next_state:
+            self.state = next_state
+
+        if side_effect:
+            side_effect()
+        return response()
 
     def _find(self, command, sudo):
         more_specific = self._transitions.get(_key(command, sudo, self.state))
