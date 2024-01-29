@@ -22,7 +22,7 @@ pytest = "~7"
 pytest-cov = "^4.0.0"
 pylint = "^3.0.3"
 flake8 = "^4"
-pendulum = "^2.1.2"
+pendulum = {extras = ["test"], version = "^3.0.0"}
 
 [tool.poetry.scripts]
 marge = "marge.__main__:run"
