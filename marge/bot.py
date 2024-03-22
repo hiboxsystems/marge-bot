@@ -129,7 +129,7 @@ class Bot:
         return processed_merge_requests
 
     def _get_merge_requests(self, project, project_name):
-        log.info('Fetching merge requests assigned to me in %s...', project_name)
+        log.debug('Fetching merge requests assigned to me in %s...', project_name)
         my_merge_requests = MergeRequest.fetch_all_open_for_user(
             project_id=project.id,
             user=self.user,
