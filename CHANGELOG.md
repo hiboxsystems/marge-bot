@@ -1,3 +1,9 @@
+  * 0.14.1:
+    - Update dependencies (#52)
+    - ci: Run tests on Python 3.11 (#16)
+    - Update pendulum to 3.0.0 (#54)
+    - Update flake8 to version 7 for Python 3.12 support (#57)
+    - Less logging by default (#56)
   * 0.14.0:
     - Drop Python 3.7 support (#47)
     - Update Poetry to 1.7 (#48)
