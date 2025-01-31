@@ -79,6 +79,17 @@ class MergeRequest(gitlab.Resource):
 
         return [cls(api, merge_request_info) for merge_request_info in my_merge_request_infos]
 
+    @classmethod
+    def fetch_all_open_assigned_to_me(cls, api, merge_order):
+        request_merge_order = 'created_at' if merge_order == 'assigned_at' else merge_order
+
+        all_merge_request_infos = api.collect_all_pages(GET(
+            '/merge_requests',
+            {'scope': 'assigned_to_me', 'state': 'opened', 'order_by': request_merge_order, 'sort': 'asc'},
+        ))
+
+        return [cls(api, merge_request_info) for merge_request_info in all_merge_request_infos]
+
     @property
     def project_id(self):
         return self.info['project_id']
