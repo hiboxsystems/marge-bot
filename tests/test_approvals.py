@@ -68,7 +68,7 @@ class TestApprovals:
 
     def setup_method(self, _method):
         self.api = Mock(Api)
-        self.api.version = Mock(return_value=Version.parse('9.2.3-ee'))
+        self.api.version = Mock(return_value=Version.parse('13.3.1-ee'))
         self.approvals = Approvals(api=self.api, info=INFO)
 
     def test_fetch_from_merge_request(self):

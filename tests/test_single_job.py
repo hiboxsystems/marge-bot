@@ -74,9 +74,9 @@ class SingleJobMockLab(MockLab):
         )
         api = self.api
         self.rewritten_sha = rewritten_sha
+        merge_request_iid = self.merge_request_info['iid']
         if expect_gitlab_rebase:
             project_id = self.merge_request_info['project_id']
-            merge_request_iid = self.merge_request_info['iid']
 
             api.add_transition(
                 PUT(f'/projects/{project_id}/merge_requests/{merge_request_iid}/rebase'),
@@ -100,6 +100,7 @@ class SingleJobMockLab(MockLab):
             )
             api.add_pipelines(
                 self.merge_request_info['source_project_id'],
+                merge_request_iid,
                 _pipeline(sha1=self.merge_request_info['sha'],
                           status='running',
                           ref=self.merge_request_info['source_branch']),
@@ -120,11 +121,13 @@ class SingleJobMockLab(MockLab):
 
         api.add_pipelines(
             self.merge_request_info['source_project_id'],
+            merge_request_iid,
             _pipeline(sha1=rewritten_sha, status='running', ref=self.merge_request_info['source_branch']),
             from_state='pushed', to_state='passed',
         )
         api.add_pipelines(
             self.merge_request_info['source_project_id'],
+            merge_request_iid,
             _pipeline(sha1=rewritten_sha, status='success', ref=self.merge_request_info['source_branch']),
             from_state=['passed', 'merged'],
         )
@@ -351,6 +354,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         if job.opts.fusion is Fusion.gitlab_rebase:
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=mocklab.merge_request_info['sha'],
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -367,6 +371,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         if job.opts.fusion is Fusion.gitlab_rebase:
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=mocklab.merge_request_info['sha'],
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -395,11 +400,13 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=expected_sha1, status='running', ref=mocklab.merge_request_info['source_branch']),
             from_state=['pushed', 'pipeline-running'], to_state='skipped',
         )
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=expected_sha1, status='skipped', ref=mocklab.merge_request_info['source_branch']),
             from_state=['skipped', 'merged'],
         )
@@ -420,6 +427,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=mocklab.merge_request_info['sha'],
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -450,11 +458,13 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=mocklab.rewritten_sha, status='running'),
             from_state=['pushed', 'pipeline-running'], to_state='failed',
         )
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=expected_sha1, status='failed'),
             from_state=['failed'],
         )
@@ -474,11 +484,13 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=expected_sha1, status='running'),
             from_state=['pushed', 'pipeline-running'], to_state='canceled',
         )
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=expected_sha1, status='canceled'),
             from_state=['canceled'],
         )
@@ -581,6 +593,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         )
         api.add_pipelines(
             mocklab.merge_request_info['source_project_id'],
+            mocklab.merge_request_info['iid'],
             _pipeline(sha1=first_rewritten_sha, status='success'),
             from_state=['pushed_but_master_moved', 'merge_rejected'],
         )
@@ -640,6 +653,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -681,6 +695,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -711,6 +726,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -748,6 +764,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -788,6 +805,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -829,6 +847,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -866,6 +885,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
             expected_sha1 = mocklab.merge_request_info['sha']
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=expected_sha1,
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
@@ -936,6 +956,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
         if job.opts.fusion is Fusion.gitlab_rebase:
             api.add_pipelines(
                 mocklab.merge_request_info['source_project_id'],
+                mocklab.merge_request_info['iid'],
                 _pipeline(sha1=mocklab.merge_request_info['sha'],
                           status='success',
                           ref=mocklab.merge_request_info['source_branch']),
