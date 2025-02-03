@@ -1,4 +1,3 @@
-import logging as log
 from enum import IntEnum, unique
 from functools import partial
 
