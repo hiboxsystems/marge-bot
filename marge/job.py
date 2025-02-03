@@ -142,18 +142,11 @@ class MergeJob:
         if commit_sha is None:
             commit_sha = merge_request.sha
 
-        if self._api.version().release >= (10, 5, 0):
-            pipelines = Pipeline.pipelines_by_merge_request(
-                merge_request.target_project_id,
-                merge_request.iid,
-                self._api,
-            )
-        else:
-            pipelines = Pipeline.pipelines_by_branch(
-                merge_request.source_project_id,
-                merge_request.source_branch,
-                self._api,
-            )
+        pipelines = Pipeline.pipelines_by_merge_request(
+            merge_request.target_project_id,
+            merge_request.iid,
+            self._api,
+        )
 
         current_pipeline = next(iter(pipeline for pipeline in pipelines if pipeline.sha == commit_sha), None)
         log.debug('Current pipeline: %s', current_pipeline)

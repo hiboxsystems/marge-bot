@@ -176,11 +176,7 @@ class MergeRequest(gitlab.Resource):
         ))
 
     def comment(self, message):
-        if self._api.version().release >= (9, 2, 2):
-            notes_url = f'/projects/{self.project_id}/merge_requests/{self.iid}/notes'
-        else:
-            # GitLab botched the v4 api before 9.2.2
-            notes_url = f'/projects/{self.project_id}/merge_requests/{self.id}/notes'
+        notes_url = f'/projects/{self.project_id}/merge_requests/{self.iid}/notes'
 
         return self._api.call(POST(notes_url, {'body': message}))
 
