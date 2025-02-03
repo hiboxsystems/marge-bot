@@ -72,7 +72,7 @@ class Bot:
         return self._api
 
     def _run(self, repo_manager):
-        time_to_sleep_between_merges_in_secs = 10
+        time_to_sleep_between_merges_in_secs = 5
         time_to_sleep_when_no_mrs_found_in_secs = 30
         while True:
             project, merge_request = self._get_assigned_merge_requests()
