@@ -121,7 +121,7 @@ class SingleMergeJob(MergeJob):
 
             if target_project.only_allow_merge_if_pipeline_succeeds:
                 self.wait_for_ci_to_pass(merge_request, actual_sha)
-                time.sleep(4)
+                time.sleep(6)
 
             self.wait_for_merge_status_to_resolve(merge_request)
 
