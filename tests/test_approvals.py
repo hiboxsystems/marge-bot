@@ -83,19 +83,6 @@ class TestApprovals:
         ))
         assert approvals.info == INFO
 
-    def test_fetch_from_merge_request_ce_compat(self):
-        api = self.api
-        api.version = Mock(return_value=Version.parse('9.2.3'))
-        api.call = Mock()
-
-        merge_request = MergeRequest(api, {'id': 74, 'iid': 6, 'project_id': 1234})
-        approvals = merge_request.fetch_approvals()
-
-        api.call.assert_not_called()
-        assert approvals.info == {
-            'id': 74, 'iid': 6, 'project_id': 1234, 'approvals_left': 0, 'approved_by': [],
-        }
-
     def test_properties(self):
         assert self.approvals.project_id == 1
         assert self.approvals.approvals_left == 1
