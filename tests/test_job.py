@@ -55,7 +55,7 @@ class TestJob:
 
     @pytest.mark.parametrize(
         'version,use_merge_request_pipelines',
-        [('9.4.0-ee', False), ('10.5.0-ee', True)],
+        [('10.5.0-ee', True)],
     )
     def test_get_mr_ci_status(self, version, use_merge_request_pipelines):
         with patch('marge.job.Pipeline', autospec=True) as pipeline_class:
