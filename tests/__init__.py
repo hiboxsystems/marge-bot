@@ -17,8 +17,6 @@ def create_bot_config(user, options):
         project_regexp='',
         git_timeout='',
         git_reference_repo='',
-        branch_regexp='',
-        source_branch_regexp='',
         merge_order='created_at',
         merge_opts=options,
         batch=False,

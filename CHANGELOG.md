@@ -1,3 +1,6 @@
+  * 0.15.0:
+    - Remove support for ancient GitLab versions (#61)
+    - Remove support for filtering MRs based on source and target branch (#62)
   * 0.14.1:
     - Update dependencies (#52)
     - ci: Run tests on Python 3.11 (#16)

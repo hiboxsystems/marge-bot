@@ -136,33 +136,7 @@ class Bot:
             api=self._api,
             merge_order=self._config.merge_order,
         )
-        branch_regexp = self._config.branch_regexp
-        filtered_mrs = [mr for mr in my_merge_requests
-                        if branch_regexp.match(mr.target_branch)]
-        log.debug(
-            'MRs that match branch_regexp: %s',
-            [mr.web_url for mr in filtered_mrs]
-        )
-        filtered_out = set(my_merge_requests) - set(filtered_mrs)
-        if filtered_out:
-            log.debug(
-                'MRs that do not match branch_regexp: %s',
-                [mr.web_url for mr in filtered_out]
-            )
-        source_branch_regexp = self._config.source_branch_regexp
-        source_filtered_mrs = [mr for mr in filtered_mrs
-                               if source_branch_regexp.match(mr.source_branch)]
-        log.debug(
-            'MRs that match source_branch_regexp: %s',
-            [mr.web_url for mr in source_filtered_mrs]
-        )
-        source_filtered_out = set(filtered_mrs) - set(source_filtered_mrs)
-        if source_filtered_out:
-            log.debug(
-                'MRs that do not match source_branch_regexp: %s',
-                [mr.web_url for mr in source_filtered_out]
-            )
-        return source_filtered_mrs
+        return my_merge_requests
 
     def _process_merge_requests(self, repo_manager, project, merge_requests):
         if not merge_requests:
@@ -223,7 +197,7 @@ class Bot:
 
 class BotConfig(namedtuple('BotConfig',
                            'user use_https auth_token ssh_key_file project_regexp merge_order merge_opts '
-                           + 'git_timeout git_reference_repo branch_regexp source_branch_regexp batch cli '
+                           + 'git_timeout git_reference_repo batch cli '
                            + 'use_only_gitlab_api')):
     pass
 

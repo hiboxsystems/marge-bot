@@ -209,18 +209,6 @@ def test_git_timeout():
             assert bot.config.git_timeout == datetime.timedelta(seconds=150)
 
 
-def test_branch_regexp():
-    with env(MARGE_AUTH_TOKEN="NON-ADMIN-TOKEN", MARGE_SSH_KEY="KEY", MARGE_GITLAB_URL='http://foo.com'):
-        with main("--branch-regexp='foo.*bar'") as bot:
-            assert bot.config.branch_regexp == re.compile('foo.*bar')
-
-
-def test_source_branch_regexp():
-    with env(MARGE_AUTH_TOKEN="NON-ADMIN-TOKEN", MARGE_SSH_KEY="KEY", MARGE_GITLAB_URL='http://foo.com'):
-        with main("--source-branch-regexp='foo.*bar'") as bot:
-            assert bot.config.source_branch_regexp == re.compile('foo.*bar')
-
-
 def test_git_reference_repo():
     with env(MARGE_AUTH_TOKEN="NON-ADMIN-TOKEN", MARGE_SSH_KEY="KEY", MARGE_GITLAB_URL='http://foo.com'):
         with main("--git-reference-repo='/foo/reference_repo'") as bot:
@@ -278,7 +266,6 @@ def test_config_file():
                 )
                 assert bot.config.project_regexp == re.compile('foo.*bar')
                 assert bot.config.git_timeout == datetime.timedelta(seconds=150)
-                assert bot.config.branch_regexp == re.compile('foo.*bar')
 
 
 def test_config_overwrites():
@@ -299,4 +286,3 @@ def test_config_overwrites():
                 )
                 assert bot.config.project_regexp == re.compile('foo.*bar')
                 assert bot.config.git_timeout == datetime.timedelta(seconds=100)
-                assert bot.config.branch_regexp == re.compile('foo.*bar')
