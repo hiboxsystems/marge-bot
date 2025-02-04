@@ -1,4 +1,5 @@
   * 0.15.0:
+    - Update Poetry to 2.0 (#65)
     - Remove Python 3.8 support (#63)
     - Remove support for ancient GitLab versions (#61)
     - Remove support for filtering MRs based on source and target branch (#62)
