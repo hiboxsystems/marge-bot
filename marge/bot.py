@@ -72,7 +72,7 @@ class Bot:
         return self._api
 
     def _run(self, repo_manager):
-        time_to_sleep_between_merges_in_secs = 10
+        time_to_sleep_between_merges_in_secs = 5
         time_to_sleep_when_no_mrs_found_in_secs = 30
         while True:
             project, merge_request = self._get_assigned_merge_requests()
@@ -112,6 +112,7 @@ class Bot:
             if not self._cached_projects[merge_request.project_id]:
                 log.debug('Ignoring MR %d from project ID %d because the project is not handled by me',
                           merge_request.iid, merge_request.project_id)
+                continue
 
             return (self._cached_projects[merge_request.project_id], merge_request)
 
