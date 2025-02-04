@@ -143,12 +143,6 @@ optional arguments:
   --git-reference-repo GIT_REFERENCE_REPO
                         A reference repo to be used when git cloning.
                            [env var: MARGE_GIT_REFERENCE_REPO] (default: None)
-  --branch-regexp BRANCH_REGEXP
-                        Only process MRs whose target branches match the given regular expression.
-                           [env var: MARGE_BRANCH_REGEXP] (default: .*)
-  --source-branch-regexp SOURCE_BRANCH_REGEXP
-                        Only process MRs whose source branches match the given regular expression.
-                           [env var: MARGE_SOURCE_BRANCH_REGEXP] (default: .*)
   --debug               Debug logging (includes all HTTP requests etc).
                            [env var: MARGE_DEBUG] (default: False)
   --cli                 Run marge-bot as a single CLI command, not as a long-running service.

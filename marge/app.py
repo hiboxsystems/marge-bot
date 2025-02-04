@@ -200,18 +200,6 @@ def _parse_config(args):  # pylint: disable=too-many-statements
         help='A reference repo to be used when git cloning.\n'
     )
     parser.add_argument(
-        '--branch-regexp',
-        type=regexp,
-        default='.*',
-        help='Only process MRs whose target branches match the given regular expression.\n',
-    )
-    parser.add_argument(
-        '--source-branch-regexp',
-        type=regexp,
-        default='.*',
-        help='Only process MRs whose source branches match the given regular expression.\n',
-    )
-    parser.add_argument(
         '--debug',
         action='store_true',
         help='Debug logging (includes all HTTP requests etc).\n',
@@ -337,8 +325,6 @@ def main(args=None):
             project_regexp=options.project_regexp,
             git_timeout=options.git_timeout,
             git_reference_repo=options.git_reference_repo,
-            branch_regexp=options.branch_regexp,
-            source_branch_regexp=options.source_branch_regexp,
             merge_order=options.merge_order,
             merge_opts=bot.MergeJobOptions.default(
                 add_tested=options.add_tested,
