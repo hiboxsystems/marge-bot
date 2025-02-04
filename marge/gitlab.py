@@ -127,6 +127,8 @@ class Api:
             log.error('Request timeout: %s', err)
             raise
         log.debug('RESPONSE CODE: %s', response.status_code)
+        if 'x-gitlab-meta' in response.headers:
+            log.debug('RESPONSE META: %s', response.headers['x-gitlab-meta'])
         log.debug('RESPONSE BODY: %r', response.content)
 
         if response.status_code == 202:
