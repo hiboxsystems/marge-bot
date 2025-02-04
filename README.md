@@ -224,7 +224,7 @@ ssh-keygen -t ed25519 -C marge-bot@invalid -f marge-bot-ssh-key -P ''
 Add the public key (`marge-bot-ssh-key.pub`) to the user's `SSH Keys` in GitLab
 and keep the private one handy.
 
-### Running marge-bot in docker using SSH (what we do)
+### Running marge-bot in docker using SSH
 
 Assuming you have already got docker installed, the quickest and most minimal
 way to run marge is like so (*but see note about passing secrets on the

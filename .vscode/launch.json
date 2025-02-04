@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Marge",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "python": "${workspaceFolder}/.venv/bin/python",
             "cwd": "${workspaceFolder}",
@@ -15,7 +15,7 @@
         },
         {
             "name": "pytest",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "python": "${workspaceFolder}/.venv/bin/python",
             "cwd": "${workspaceFolder}",
