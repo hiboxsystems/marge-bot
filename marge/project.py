@@ -29,25 +29,16 @@ class Project(gitlab.Resource):
         projects_kwargs = {'membership': True,
                            'with_merge_requests_enabled': True,
                            'archived': False,
+                           'simple': True,
+                           'min_access_level': int(AccessLevel.developer),
                            }
-
-        # GitLab has an issue where projects may not show appropriate permissions in nested groups. Using
-        # `min_access_level` is known to provide the correct projects, so we'll prefer this method
-        # if it's available. See #156 for more details.
-        projects_kwargs["min_access_level"] = int(AccessLevel.developer)
 
         projects_info = api.collect_all_pages(GET(
             '/projects',
             projects_kwargs,
         ))
 
-        projects = []
-        for project_info in projects_info:
-            # We know we fetched projects with at least developer access, so we'll use that as
-            # a fallback if GitLab doesn't correctly report permissions as described above.
-            project_info["permissions"]["marge"] = {"access_level": AccessLevel.developer}
-
-            projects.append(cls(api, project_info))
+        projects = [cls(api, p) for p in projects_info]
 
         return projects
 

@@ -1,4 +1,6 @@
   * 0.15.0:
+    - Use more efficient `/merge_requests` API to fetch assigned MRs (#59)
+    - Use Python 3.12 in Docker image (#66)
     - Update Poetry to 2.0 (#65)
     - Remove Python 3.8 support (#63)
     - Remove support for ancient GitLab versions (#61)

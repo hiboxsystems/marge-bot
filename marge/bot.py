@@ -3,13 +3,12 @@ import time
 from collections import namedtuple
 from tempfile import TemporaryDirectory
 
-from . import batch_job
 from . import git
 from . import job
 from . import merge_request as merge_request_module
 from . import single_merge_job
 from . import store
-from .project import AccessLevel, Project
+from .project import Project
 
 MergeRequest = merge_request_module.MergeRequest
 
@@ -18,6 +17,9 @@ class Bot:
     def __init__(self, *, api, config):
         self._api = api
         self._config = config
+
+        self._matching_projects_last_refresh = None
+        self._cached_projects = None
 
         user = config.user
         opts = config.merge_opts
@@ -70,76 +72,68 @@ class Bot:
         return self._api
 
     def _run(self, repo_manager):
-        time_to_sleep_between_projects_in_secs = 1
-        min_time_to_sleep_after_iterating_all_projects_in_secs = 30
+        time_to_sleep_between_merges_in_secs = 5
+        time_to_sleep_when_no_mrs_found_in_secs = 30
         while True:
-            projects = self._get_projects()
-            processed_merge_requests = self._process_projects(
-                repo_manager,
-                time_to_sleep_between_projects_in_secs,
-                projects,
-            )
+            project, merge_request = self._get_assigned_merge_requests()
+
+            if merge_request:
+                self._process_merge_request(repo_manager, project, merge_request)
+                if not self._config.cli:
+                    # Continue with the next MR without sleeping
+                    time.sleep(time_to_sleep_between_merges_in_secs)
+                    continue
+
             if self._config.cli:
                 return
 
-            if processed_merge_requests == 0:
-                big_sleep = max(0,
-                                min_time_to_sleep_after_iterating_all_projects_in_secs
-                                - time_to_sleep_between_projects_in_secs * len(projects))
-                log.debug('Sleeping for %s seconds...', big_sleep)
-                time.sleep(big_sleep)
+            log.debug('Sleeping for %s seconds...', time_to_sleep_when_no_mrs_found_in_secs)
+            time.sleep(time_to_sleep_when_no_mrs_found_in_secs)
 
-    def _get_projects(self):
-        log.debug('Finding out my current projects...')
-        my_projects = Project.fetch_all_mine(self._api)
-        project_regexp = self._config.project_regexp
-        filtered_projects = [p for p in my_projects if project_regexp.match(p.path_with_namespace)]
-        log.debug(
-            'Projects that match project_regexp: %s',
-            [p.path_with_namespace for p in filtered_projects]
-        )
-        filtered_out = set(my_projects) - set(filtered_projects)
-        if filtered_out:
-            log.debug(
-                'Projects that do not match project_regexp: %s',
-                [p.path_with_namespace for p in filtered_out]
-            )
-        return filtered_projects
-
-    def _process_projects(
-        self,
-        repo_manager,
-        time_to_sleep_between_projects_in_secs,
-        projects,
-    ):
-        """Returns the number of processed merge requests."""
-        processed_merge_requests = 0
-
-        for project in projects:
-            project_name = project.path_with_namespace
-
-            if project.access_level < AccessLevel.reporter:
-                log.warning("Don't have enough permissions to browse merge requests in %s!", project_name)
-                continue
-            merge_requests = self._get_merge_requests(project, project_name)
-            processed_merge_requests += len(merge_requests)
-            self._process_merge_requests(repo_manager, project, merge_requests)
-            time.sleep(time_to_sleep_between_projects_in_secs)
-
-        return processed_merge_requests
-
-    def _get_merge_requests(self, project, project_name):
-        log.debug('Fetching merge requests assigned to me in %s...', project_name)
-        my_merge_requests = MergeRequest.fetch_all_open_for_user(
-            project_id=project.id,
-            user=self.user,
+    def _get_assigned_merge_requests(self):
+        log.debug('Fetching merge requests assigned to me...')
+        my_merge_requests = MergeRequest.fetch_all_open_assigned_to_me(
             api=self._api,
             merge_order=self._config.merge_order,
         )
-        return my_merge_requests
 
-    def _process_merge_requests(self, repo_manager, project, merge_requests):
-        if not merge_requests:
+        self._refresh_cached_projects(forced=False)
+
+        for merge_request in my_merge_requests:
+            if merge_request.project_id not in self._cached_projects:
+                # We might have just gotten access to this project, so force a check.
+                self._refresh_cached_projects(forced=True)
+
+            if merge_request.project_id not in self._cached_projects:
+                log.debug('Ignoring MR %d from project ID %d because no project info found',
+                          merge_request.iid, merge_request.project_id)
+                continue
+
+            if not self._cached_projects[merge_request.project_id]:
+                log.debug('Ignoring MR %d from project ID %d because the project is not handled by me',
+                          merge_request.iid, merge_request.project_id)
+                continue
+
+            return (self._cached_projects[merge_request.project_id], merge_request)
+
+        return (None, None)
+
+    def _refresh_cached_projects(self, forced):
+        if forced or not self._cached_projects or self._matching_projects_last_refresh < (time.time() - 900):
+            my_projects = Project.fetch_all_mine(self._api)
+            project_regexp = self._config.project_regexp
+
+            self._cached_projects = {}
+            for project in my_projects:
+                if project_regexp.match(project.path_with_namespace):
+                    self._cached_projects[project.id] = project
+                else:
+                    self._cached_projects[project.id] = False
+
+            self._matching_projects_last_refresh = time.time()
+
+    def _process_merge_request(self, repo_manager, project, merge_request):
+        if not merge_request:
             log.debug('Nothing to merge at this point...')
             return
 
@@ -149,31 +143,7 @@ class Bot:
             log.exception("Couldn't initialize repository for project!")
             raise
 
-        log.info('Got %s requests to merge;', len(merge_requests))
-        if self._config.batch and len(merge_requests) > 1 and not self._config.use_only_gitlab_api:
-            log.info('Attempting to merge as many MRs as possible using BatchMergeJob...')
-            batch_merge_job = batch_job.BatchMergeJob(
-                api=self._api,
-                user=self.user,
-                project=project,
-                merge_requests=merge_requests,
-                repo=repo,
-                config=self._config,
-                options=self._config.merge_opts,
-            )
-            try:
-                batch_merge_job.execute()
-                return
-            except batch_job.CannotBatch as err:
-                log.warning('BatchMergeJob aborted: %s', err)
-            except batch_job.CannotMerge as err:
-                log.warning('BatchMergeJob failed: %s', err)
-                return
-            except git.GitError as err:
-                log.exception('BatchMergeJob failed: %s', err)
-
-        log.info('Attempting to merge the oldest MR...')
-        merge_request = merge_requests[0]
+        log.debug('Attempting to merge MR...')
         merge_job = self._get_single_job(
             project=project,
             merge_request=merge_request,
