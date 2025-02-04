@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.10-slim@sha256:cd00babde42b5b5a8c6dead380a4135d3804d1355afc508605f7f2f925a9a245 AS builder
+FROM python:3.12-slim@sha256:8859bd6ca943079262c27e38b7119cdacede77c463139a15651dd340087a6cc9 AS builder
 
 ARG POETRY_VERSION=2.0.1
 RUN pip -V
@@ -21,7 +21,7 @@ RUN --mount=type=bind,source=poetry.lock,target=poetry.lock \
     && pip wheel --no-deps --wheel-dir /app/wheels -r requirements.txt \
     && poetry build --quiet --no-ansi --no-interaction --format=sdist
 
-FROM python:3.10-slim@sha256:cd00babde42b5b5a8c6dead380a4135d3804d1355afc508605f7f2f925a9a245 AS runtime
+FROM python:3.12-slim@sha256:8859bd6ca943079262c27e38b7119cdacede77c463139a15651dd340087a6cc9 AS runtime
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -q \
