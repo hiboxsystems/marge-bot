@@ -95,7 +95,7 @@ class TestApprovals:
 
     def test_reapprove(self):
         self.approvals.reapprove()
-        self.api.call.has_calls([
+        self.api.call.assert_has_calls([
             call(POST(endpoint='/projects/1/merge_requests/6/approve', args={}, extract=None), sudo=1),
             call(POST(endpoint='/projects/1/merge_requests/6/approve', args={}, extract=None), sudo=2)
         ])
