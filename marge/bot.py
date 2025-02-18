@@ -93,6 +93,7 @@ class Bot:
     def _get_assigned_merge_requests(self):
         log.debug('Fetching merge requests assigned to me...')
         my_merge_requests = MergeRequest.fetch_all_open_assigned_to_me(
+            user=self.user,
             api=self._api,
             merge_order=self._config.merge_order,
         )
