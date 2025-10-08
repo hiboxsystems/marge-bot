@@ -1,8 +1,4 @@
-import unittest
-import os
-
 from marge import gitlab
-from marge.gitlab import GET
 
 
 class TestVersion:
