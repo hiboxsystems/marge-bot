@@ -218,7 +218,7 @@ class MergeRequest(gitlab.Resource):
                 # GitLab does not seem to always return the latest SHA even after
                 # rebase_in_progress starts returning false, hence we need to wait
                 # a little bit more before returning.
-                time.sleep(5)
+                time.sleep(7)
                 self.refetch_info()
                 return
 

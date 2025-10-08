@@ -220,7 +220,7 @@ class SingleMergeJob(MergeJob):
     def wait_for_branch_to_be_merged(self):
         merge_request = self._merge_request
         time_0 = datetime.utcnow()
-        waiting_time_in_secs = 10
+        waiting_time_in_secs = 5
 
         while datetime.utcnow() - time_0 < self._merge_timeout:
             merge_request.refetch_info()
