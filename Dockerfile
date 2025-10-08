@@ -1,6 +1,13 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12-slim@sha256:8859bd6ca943079262c27e38b7119cdacede77c463139a15651dd340087a6cc9 AS builder
+FROM python:3.13-slim@sha256:8d4ea9d6915221b2d78e39e0dea0c714a4affb73ba74e839dbf6f76c524f78e4 AS builder
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -q \
+    && apt-get install -yq --no-install-recommends \
+    build-essential=12.12 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/log/*
 
 ARG POETRY_VERSION=2.2.1
 RUN pip -V
@@ -18,16 +25,16 @@ RUN --mount=type=bind,source=poetry.lock,target=poetry.lock \
     --mount=type=cache,sharing=locked,id=pipcache,mode=0777,target=/root/.cache/pip \
     poetry self add poetry-plugin-export && \
     poetry export -o requirements.txt \
-    && pip wheel --no-deps --wheel-dir /app/wheels -r requirements.txt \
+    && pip wheel --wheel-dir /app/wheels -r requirements.txt \
     && poetry build --quiet --no-ansi --no-interaction --format=sdist
 
-FROM python:3.12-slim@sha256:8859bd6ca943079262c27e38b7119cdacede77c463139a15651dd340087a6cc9 AS runtime
+FROM python:3.13-slim@sha256:8d4ea9d6915221b2d78e39e0dea0c714a4affb73ba74e839dbf6f76c524f78e4 AS runtime
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -q \
     && apt-get install -yq --no-install-recommends \
-    git=1:2.39.5-0+deb12u2 \
-    ssh=1:9.2p1-2+deb12u7 \
+    git=1:2.47.3-0+deb13u1 \
+    ssh=1:10.0p1-7 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/log/*
 
