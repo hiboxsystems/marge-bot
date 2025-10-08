@@ -161,7 +161,7 @@ class MergeJob:
 
     def wait_for_ci_to_pass(self, merge_request, commit_sha=None):
         time_0 = datetime.utcnow()
-        waiting_time_in_secs = 10
+        waiting_time_in_secs = 5
 
         if commit_sha is None:
             commit_sha = merge_request.sha
@@ -201,8 +201,8 @@ class MergeJob:
         evidence that suggest gitlab will always check the mergeability synchronously while merging MRs.
         See more https://github.com/smarkets/marge-bot/pull/265#issuecomment-724147901
         """
-        attempts = 3
-        waiting_time_in_secs = 5
+        attempts = 5
+        waiting_time_in_secs = 2
 
         log.info('Waiting for MR !%s to have merge_status can_be_merged', merge_request.iid)
         for attempt in range(attempts):
