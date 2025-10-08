@@ -2,7 +2,7 @@
 
 FROM python:3.12-slim@sha256:8859bd6ca943079262c27e38b7119cdacede77c463139a15651dd340087a6cc9 AS builder
 
-ARG POETRY_VERSION=2.0.1
+ARG POETRY_VERSION=2.2.1
 RUN pip -V
 # hadolint ignore=DL3042
 RUN --mount=type=cache,sharing=locked,id=pipcache,mode=0777,target=/root/.cache/pip \
