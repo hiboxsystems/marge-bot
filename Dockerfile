@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -q \
     && apt-get install -yq --no-install-recommends \
     git=1:2.47.3-0+deb13u1 \
-    ssh=1:10.0p1-7 \
+    ssh=1:10.0p1-7+deb13u1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/log/*
 

@@ -1,3 +1,5 @@
+from requests.utils import quote
+
 from . import gitlab
 
 
@@ -9,7 +11,7 @@ class Branch(gitlab.Resource):
     @classmethod
     def fetch_by_name(cls, project_id, branch, api):
         info = api.call(GET(
-            f'/projects/{project_id}/repository/branches/{branch}',
+            f'/projects/{project_id}/repository/branches/{quote(branch, safe="")}',
         ))
         return cls(api, info)
 
