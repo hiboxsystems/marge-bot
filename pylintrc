@@ -21,6 +21,7 @@ min-similarity-lines=10
 
 [FORMAT]
 max-line-length=110
+max-module-lines=1500
 
 [DESIGN]
 max-args=10

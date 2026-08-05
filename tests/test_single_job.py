@@ -543,6 +543,42 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         assert api.state == 'protected'
 
+    def test_fails_with_message_if_rebase_is_forbidden(self, mocks_factory, fusion):
+        if fusion is not Fusion.gitlab_rebase:
+            pytest.skip('Only applicable when using GitLab API rebase')
+
+        mocklab, api, job = mocks_factory(extra_mocklab_opts={
+            'merge_request_options': {
+                'diff_refs': {
+                    'base_sha': 'stale-target-sha',
+                    'head_sha': INITIAL_MR_SHA,
+                },
+            },
+        })
+        rebase_url = (
+            f"/projects/{mocklab.merge_request_info['project_id']}"
+            f"/merge_requests/{mocklab.merge_request_info['iid']}/rebase"
+        )
+
+        api.add_transition(
+            PUT(rebase_url),
+            Error(marge.gitlab.Forbidden(403, {'message': '403 Forbidden - Cannot push to source branch'})),
+            from_state='initial',
+            to_state='rebase-forbidden',
+        )
+
+        message = (
+            'GitLab denied rebasing this merge request. '
+            'My user likely cannot push to the source branch. '
+            'Please grant me Developer access to your fork of this project.'
+        )
+
+        with mocklab.expected_failure(message):
+            job.execute()
+
+        assert api.state == 'rebase-forbidden'
+        assert api.notes == [f"I couldn't merge this merge request: {message}"]
+
     def test_second_time_if_master_moved(self, mocks_factory, fusion, update_sha, rewrite_sha):
         if fusion is Fusion.gitlab_rebase:
             pytest.skip('Untested how the GitLab API reacts in this situation')
