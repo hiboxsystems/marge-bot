@@ -543,7 +543,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
 
         assert api.state == 'protected'
 
-    def test_fails_with_actionable_message_if_gitlab_rebase_is_forbidden(self, mocks_factory, fusion):
+    def test_fails_with_message_if_rebase_is_forbidden(self, mocks_factory, fusion):
         if fusion is not Fusion.gitlab_rebase:
             pytest.skip('Only applicable when using GitLab API rebase')
 
