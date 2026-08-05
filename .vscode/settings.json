@@ -9,4 +9,6 @@
         "--no-cov"
     ],
     "python.testing.unittestEnabled": false,
+    "python-envs.defaultEnvManager": "ms-python.python:poetry",
+    "python-envs.defaultPackageManager": "ms-python.python:poetry",
 }

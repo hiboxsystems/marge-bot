@@ -410,6 +410,13 @@ class MergeJob:
             raise CannotMerge(f"GitLab failed to rebase the branch saying: {err.args[0]}") from err
         except TimeoutError as err:
             raise CannotMerge("GitLab was taking too long to rebase the branch...") from err
+        except gitlab.Forbidden as err:
+            details = err.error_message or str(err)
+            raise CannotMerge(
+                'GitLab denied rebasing this merge request. '
+                'My user likely cannot push to the source branch. '
+                'Please grant me Developer access to your fork of this project.'
+            ) from err
         except gitlab.ApiError as err:
             branch = Branch.fetch_by_name(
                 merge_request.source_project_id,
