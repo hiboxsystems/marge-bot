@@ -1,4 +1,4 @@
-from unittest.mock import call, Mock
+from unittest.mock import call, Mock, patch
 
 import pytest
 
@@ -134,11 +134,8 @@ class TestMergeRequest:
                 dict(INFO, rebase_in_progress=False)
             ),
             (
-                GET(
-                    '/projects/1234/merge_requests/54',
-                    {'include_rebase_in_progress': 'true'}
-                ),  # second refetch_info with correct SHA
-                dict(INFO, rebase_in_progress=False)
+                GET('/projects/5678/repository/branches/useless_new_feature'),
+                {'commit': {'id': INFO['sha']}}
             ),
         ]
 
@@ -198,16 +195,74 @@ class TestMergeRequest:
                 dict(INFO, rebase_in_progress=False)
             ),
             (
-                GET(
-                    '/projects/1234/merge_requests/54',
-                    {'include_rebase_in_progress': 'true'}
-                ),  # second refetch_info with correct SHA
-                dict(INFO, rebase_in_progress=False)
+                GET('/projects/5678/repository/branches/useless_new_feature'),
+                {'commit': {'id': INFO['sha']}}
             ),
         ]
         self.api.call = Mock(side_effect=[resp for (req, resp) in expected])
         self.merge_request.rebase()
         self.api.call.assert_has_calls([call(req) for (req, resp) in expected])
+
+    @patch('time.sleep')
+    def test_rebase_waits_for_sha_to_match_source_branch(self, _sleep):
+        expected = [
+            (
+                GET(
+                    '/projects/1234/merge_requests/54',
+                    {'include_rebase_in_progress': 'true'}
+                ),  # refetch_info -> not in progress
+                INFO
+            ),
+            (
+                PUT('/projects/1234/merge_requests/54/rebase'),
+                True
+            ),
+            (
+                GET(
+                    '/projects/1234/merge_requests/54',
+                    {'include_rebase_in_progress': 'true'}
+                ),  # refetch_info -> succeeded, but old SHA
+                dict(INFO, rebase_in_progress=False)
+            ),
+            (
+                GET('/projects/5678/repository/branches/useless_new_feature'),
+                {'commit': {'id': 'rebased'}}
+            ),
+            (
+                GET(
+                    '/projects/1234/merge_requests/54',
+                    {'include_rebase_in_progress': 'true'}
+                ),  # refetch_info -> still old SHA
+                dict(INFO, rebase_in_progress=False)
+            ),
+            (
+                GET(
+                    '/projects/1234/merge_requests/54',
+                    {'include_rebase_in_progress': 'true'}
+                ),  # refetch_info -> new SHA
+                dict(INFO, rebase_in_progress=False, sha='rebased')
+            ),
+        ]
+
+        self.api.call = Mock(side_effect=[resp for (req, resp) in expected])
+        self.merge_request.rebase()
+        self.api.call.assert_has_calls([call(req) for (req, resp) in expected])
+        assert self.merge_request.sha == 'rebased'
+
+    @patch('time.sleep')
+    def test_rebase_times_out_if_sha_does_not_match_source_branch(self, _sleep):
+        def call_api(command):
+            if command == PUT('/projects/1234/merge_requests/54/rebase'):
+                return True
+            if command == GET('/projects/5678/repository/branches/useless_new_feature'):
+                return {'commit': {'id': 'rebased'}}
+            return dict(INFO, rebase_in_progress=False)
+
+        self.api.call = Mock(side_effect=call_api)
+
+        with pytest.raises(TimeoutError):
+            self.merge_request.rebase()
+        assert self.merge_request.sha == INFO['sha']
 
     def test_accept_remove_branch(self):
         self._load(dict(INFO, sha='badc0de'))
