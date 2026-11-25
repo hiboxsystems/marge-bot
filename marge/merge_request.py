@@ -5,6 +5,7 @@ import datetime
 
 from . import gitlab
 from .approvals import Approvals
+from .commit import Commit
 
 
 GET, POST, PUT, DELETE = gitlab.GET, gitlab.POST, gitlab.PUT, gitlab.DELETE
@@ -215,16 +216,30 @@ class MergeRequest(gitlab.Resource):
                 if self.merge_error:
                     raise MergeRequestRebaseFailed(self.merge_error)
 
-                # GitLab does not seem to always return the latest SHA even after
-                # rebase_in_progress starts returning false, hence we need to wait
-                # a little bit more before returning.
-                time.sleep(7)
-                self.refetch_info()
+                self._wait_for_sha_to_match_source_branch()
                 return
 
             time.sleep(wait_between_attempts_in_secs)
 
         raise TimeoutError('Waiting for merge request to be rebased by GitLab')
+
+    def _wait_for_sha_to_match_source_branch(self):
+        # The rebase updates the branch at once, but GitLab updates the MR head
+        # asynchronously, sometimes more than 30 s later. Until then, the MR
+        # gives the old head, whose pipeline GitLab cancels as redundant.
+        branch_sha = Commit.last_on_branch(self.source_project_id, self.source_branch, self._api).id
+
+        max_attempts = 60
+        wait_between_attempts_in_secs = 2
+
+        for _ in range(max_attempts):
+            if self.sha == branch_sha:
+                return
+
+            time.sleep(wait_between_attempts_in_secs)
+            self.refetch_info()
+
+        raise TimeoutError('Waiting for GitLab to update the merge request after the rebase')
 
     def accept(self, remove_branch=False, sha=None, merge_when_pipeline_succeeds=True):
         return self._api.call(PUT(
